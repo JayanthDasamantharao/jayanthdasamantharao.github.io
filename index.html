@@ -29,7 +29,24 @@
                 <h6 class="header-mono typewriter" >Data Enthusiast | Analyst | Developer</h6>
                 <button class="btn btn-primary btn-rounded"><i class="ti-printer pr-2"></i>Print Resume</button>
             </div>
-        </div>
+
+            <script>
+                // Typewriter effect for the header-mono element
+                const headerMono = document.querySelector('.header-mono');
+                const text = headerMono.innerText;
+                headerMono.innerText = '';
+            
+                let index = 0;
+                function typewriter() {
+                    headerMono.innerText += text[index];
+                    index++;
+                    if (index < text.length) {
+                        setTimeout(typewriter, 100); // Adjust the delay as needed
+                    }
+                }
+            
+                typewriter();
+            </script>
     </header>
     <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-white" data-spy="affix" data-offset-top="510">
         <div class="container">
