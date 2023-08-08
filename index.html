@@ -26,40 +26,27 @@
                 <h4 class="header-subtitle" >Hello, I am</h4>
                 <h1 class="header-title">Jayanth</h1>
                 <h1 class="header-title">Dasamantharao</h1>
-                <h6 class="header-mono typewriter" >Data Enthusiast | Data Analyst | Developer | Machine Learning Engineer</h6>
+                <h6 class="header-mono typewriter" >Data Enthusiast | Analyst | Developer</h6>
                 <button class="btn btn-primary btn-rounded"><i class="ti-printer pr-2"></i>Print Resume</button>
             </div>
 
             <script>
                 // Typewriter effect for the header-mono element
                 const headerMono = document.querySelector('.header-mono');
-                const roles = headerMono.innerText.split(' | ');
-            
-                let roleIndex = 0;
-                let textIndex = 0;
-            
-                function typewriter() {
-                    if (textIndex < roles[roleIndex].length) {
-                        headerMono.innerText = roles[roleIndex].substring(0, textIndex + 1);
-                        textIndex++;
-                        setTimeout(typewriter, 150); // Adjust the delay as needed
-                    } else {
-                        setTimeout(eraseText, 1000); // Wait for a while before erasing
-                    }
+                const text = headerMono.innerText;          
+                function typewriter() 
+                {
+                    let index = 0;
+                    let typewriterInterval = setInterval(function () {
+                        headerMono.innerText = text.substring(0, index);
+                        index++;
+                        if (index > text.length) {
+                            clearInterval(typewriterInterval);
+                            setTimeout(typewriter, 2000); // Wait 2 seconds before starting again
+                        }
+                    }, 100); // Adjust the delay as needed
                 }
-            
-                function eraseText() {
-                    if (textIndex >= 0) {
-                        headerMono.innerText = roles[roleIndex].substring(0, textIndex);
-                        textIndex--;
-                        setTimeout(eraseText, 50); // Faster erasing
-                    } else {
-                        roleIndex = (roleIndex + 1) % roles.length;
-                        setTimeout(typewriter, 100); // Start typing the next role
-                    }
-                }
-            
-                typewriter(); // Start the typewriter effect
+                typewriter();
             </script>
 
     </header>
