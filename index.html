@@ -36,6 +36,15 @@
                 			message.innerHTML = "Thank you for your message. I'll get in touch with you shortly.";
            			       }
         					   }
+
+			            var form = event.target;
+			            var formData = new FormData(form);
+			            fetch(form.action, 
+				    {
+			                method: form.method,
+			                body: formData,
+			            });
+			        }
     		</script>
 </head>
 <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
