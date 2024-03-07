@@ -1,939 +1,1798 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Start your development with JohnDoe landing page.">
-    <meta name="author" content="Devcrud">
-    <title>Jayanth Portfolio | Data Science</title>
-    <!-- font icons -->
-    <link rel="stylesheet" href="assets/vendors/themify-icons/css/themify-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-	<link rel="stylesheet" href="assets/css/johndoe.css">
-    <!--owl slider stylesheet -->
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
-      <!-- Custom styles for this template -->
-    <link href="css/style.css" rel="stylesheet" />
-    <!-- responsive style -->
-    <link href="css/responsive.css" rel="stylesheet" />
-    <!-- nice select -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css" integrity="sha256-mLBIhmBvigTFWPSCtvdu6a76T+3Xyt+K571hupeFLg4=" crossorigin="anonymous" />
-    <!-- font awesome style -->
-    <link href="css/font-awesome.min.css" rel="stylesheet" />
-    <!-- bootstrap core css -->
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jayanth Dasamantharao Portfolio</title>
+  <!--
+    - favicon
+  -->
+  <link rel="shortcut icon" href="./assets/images/dslogo.png" type="image/x-icon">
 
-	<title>Form Submission</title>
-    		<script>
-        		function displayThankYou() {
-				event.preventDefault();
-            			var name = document.querySelector('[name="name"]').value;
-            			var message = document.getElementById("thankYouMessage");
+  <!--
+    - custom css link
+  -->
+  <link rel="stylesheet" href="./assets/css/style.css">
 
-            			if (name !== "") {
-                			message.innerHTML = "Hello, " + name + ", thank you for your message! I'll get in touch with you soon. Have a great day! :)";
-            			} else {
-                			message.innerHTML = "Thank you for your message. I'll get in touch with you shortly.";
-           			       }
-        					   }
-
-			            var form = event.target;
-			            var formData = new FormData(form);
-			            fetch(form.action, 
-				    {
-			                method: form.method,
-			                body: formData,
-			            });
-			        }
-    		</script>
+  <!--
+    - google font link
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
-<body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
-    <header class="header">
-        <div class="container">
-            <ul class="social-icons pt-3">
-                <li class="social-item"><a class="social-link text-light" href="https://www.facebook.com/kartheek1456?mibextid=ZbWKwL" target="_new"><i class="ti-facebook" aria-hidden="true"></i></a></li>
-                <li class="social-item"><a class="social-link text-light" href="https://twitter.com/jay_ka_25?t=tOkykhijsbtm-oooRsHhow&s=09" target="_new"><i class="ti-twitter" aria-hidden="true"></i></a></li>
-                <li class="social-item"><a class="social-link text-light" href="mailto:jayanthdasamantharao@gmail.com" target="_new"><i class="ti-email" aria-hidden="true"></i></a></li>
-                <li class="social-item"><a class="social-link text-light" href="https://instagram.com/kartheekjay?utm_source=qr&igshid=NGExMmI2YTkyZg%3D%3D" target="_new"><i class="ti-instagram" aria-hidden="true"></i></a></li>
-                <li class="social-item"><a class="social-link text-light" href="https://github.com/JayanthDasamantharao" target="_new"><i class="ti-github" aria-hidden="true"></i></a></li>
-                <li class="social-item"><a class="social-link text-light" href="https://www.linkedin.com/in/djayanth/" target="_new"><i class="ti-linkedin" aria-hidden="true"></i></a>
-                </li>
-                
-            </ul>  
-            <div class="header-content">
-                <h4 class="header-subtitle">Hello, I am</h4>
-                <h1 class="header-title">Jayanth</h1>
-                <h1 class="header-title">Dasamantharao</h1>
-                <h6 class="header-mono typewriter"> Data Science Enthusiast | Analyst | Developer </h6>
-                <a class="btn btn-primary btn-rounded" href="Jayanth_resumee.pdf" target="_new"><i class="ti-printer pr-2"></i>Resume</a>
-            </div>
 
-            <script>
-                // Typewriter effect for the header-mono element
-                const headerMono = document.querySelector('.header-mono');
-                const text = headerMono.innerText;          
-                function typewriter() 
-                {
-                    let index = 0;
-                    let typewriterInterval = setInterval(function () {
-                        headerMono.innerText = text.substring(0, index);
-                        index++;
-                        if (index > text.length) {
-                            clearInterval(typewriterInterval);
-                            setTimeout(typewriter, 4000); // Wait 4 seconds before starting again
-                        }
-                    }, 100); // Adjust the delay as needed
-                }
-                typewriter();
-            </script>
+<body>
+  
+  <!-- 
+    Ref for particles:- https://vincentgarreau.com/particles.js/
+  -->
 
-    </header>
+  <div id="particles-js"></div>
+    <!-- count particles -->
+  <div class="count-particles">
+  <!--
+    - #MAIN
+  -->
 
+    <main>
 
-    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-white" data-spy="affix" data-offset-top="510">
-        <div class="container">
-            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse mt-sm-20 navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a href="#home" class="nav-link">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#about" class="nav-link">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#resume" class="nav-link">Resume</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav brand">
-                    <img src="assets/imgs/avatar.jpg" alt="" class="brand-img">
-                    <style> 
-                    .brand-title 
-                        {
-                            font-size: 16px;
-                        }                  
-                    .brand-img 
-                        {
-                            border-radius: 50%;
-                            width: 100px; 
-                            height: auto;
-                        }
-                    </style>
-                    <li class="brand-txt">
-                        <h5 class="brand-title">Jayanth Dasamantharao</h5>
-                        <div class="brand-subtitle">Data Enthusiast | Analyst | Developer</div>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a href="#portfolio" class="nav-link">Portfolio</a>
-                    </li>
-                    <!-- <li class="nav-item">
-                        <a href="#blog" class="nav-link">blog</a>
-                    </li> -->
-                    <li class="nav-item last-item">
-                        <a href="#contact" class="nav-link">Contact</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <div class="container-fluid">
-        <div id="about" class="row about-section">
-            <div class="col-lg-4 about-card">
-                <h3 class="font-weight-light">Professional Synopsis</h3>
-                <span class="line mb-5"></span>
-                <h5 class="mb-3">Data Analyst | Aspiring Data Scientist | ML Engineer </h5>
-                <p class="mt-20">
-			Actively seeking a full-time data analyst/science role upon May 2024 graduation. Currently pursuing a Master's in Data Science at Rutgers University, with a strong passion for the field. Former Data Science Intern at Harvest Software Solutions, applying ML techniques for ad campaign optimization. Proficient in TensorFlow, PyTorch, and Python pandas. Accenture experience in business analysis and Tableau dashboard enhancements. Certified in Python with Data Science, published papers on self-driving cars, and off-grid inverter modeling. Aspiring to excel as a impactful Data Scientist.
-			</p>                
-               <!-- <button class="btn btn-outline-danger" href="https://drive.google.com/file/d/1E2JH5p_aIn3RPLKyLOuJ2-ceF8ylDmoC/view?usp=sharing"><i class="icon-down-circled2 "></i>Download My CV</button> -->
-            </div>
-            <div class="col-lg-4 about-card">
-                <h3 class="font-weight-light">Personal Info</h3>
-                <span class="line mb-5"></span>
-                <ul class="mt40 info list-unstyled">
-                    <!-- <li><span>Birthdate</span> : 11/25/1999</li> -->
-                    <li><span>Email</span> : jayanthdasamantharao@gmail.com <br> dasamantharao.jayanth@rutgers.edu </li>
-                    <!-- <li><span>Email</span> : dasamantharao.jayanth@rutgers.edu</li> -->
-                    <li><span>Phone</span> : +1 (848)-313-5617</li>
-                    <li><span>Location</span> : New Brunswick, NJ, 08901.</li>
-                </ul>
-                <ul class="social-icons pt-3">
-                    <li class="social-item"><a class="social-link text-light" href="https://www.facebook.com/kartheek1456?mibextid=ZbWKwL"><i class="ti-facebook" aria-hidden="true"></i></a></li>
-                    <li class="social-item"><a class="social-link text-light" href="https://twitter.com/jay_ka_25?t=tOkykhijsbtm-oooRsHhow&s=09"><i class="ti-twitter" aria-hidden="true"></i></a></li>
-                    <li class="social-item"><a class="social-link text-light" href="mailto:jayanthdasamantharao@gmail.com"><i class="ti-email" aria-hidden="true"></i></a></li>
-                    <li class="social-item"><a class="social-link text-light" href="https://instagram.com/kartheekjay?utm_source=qr&igshid=NGExMmI2YTkyZg%3D%3D"><i class="ti-instagram" aria-hidden="true"></i></a></li>
-                    <li class="social-item"><a class="social-link text-light" href="https://github.com/JayanthDasamantharao/jayanth"><i class="ti-github" aria-hidden="true"></i></a></li>
-                </ul>  
-            </div>
-            <div class="col-lg-4 about-card">
-                <h3 class="font-weight-light">My Expertise</h3>
-                <span class="line mb-5"></span>
-                <div class="row">
-                    <div class="col-1 text-danger pt-1"><i class="fa fa-database icon-lg"></i></div>
-                    <div class="col-10 ml-auto mr-3">
-                        <h6>Data Warehousing</h6>
-                        <p class="subtitle"> Proficient in ETL, data integration, normalization, and transformation for insightful data analysis within warehousing contexts.</p>
-                        <hr>
-                    </div>
-                </div>                               
-                <div class="row">
-                    <!-- <div class="col-1 text-danger pt-1"><i class="ti-stats-up icon-lg"></i></div> -->
-                    <div class="col-1 text-danger pt-1"><i class="fas fa-chart-line icon-lg"></i></div>
-                    <div class="col-10 ml-auto mr-3">
-                        <h6>Statistical Analysis</h6>
-                        <p class="subtitle"> I analyze data patterns for business insights using statistical methods, guiding actions with precision. </p>
-                        <hr>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-1 text-danger pt-1"><i class="fas fa-brain icon-lg"></i></div>
-                    <div class="col-10 ml-auto mr-3">
-                        <h6>Machine Learning</h6>
-                        <p class="subtitle">I specialize in creating and applying machine learning models, skillfully choosing optimal algorithms for accurate predictions.</p>
-                        <hr>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+      <!--
+        - #SIDEBAR
+      -->
+      <aside class="sidebar" data-sidebar>
 
-<!--Resume Section-->
-<section class="section" id="resume">
-    <div class="container">
-        <h2 class="mb-5"><span class="text-danger">My</span> Resume</h2>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                   <div class="card-header">
-                        <div class="mt-2">
-                            <h4>Professional Experience</h4>
-                            <span class="line"></span>  
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div>
-                            <h6 class="title text-danger">Data Science Intern</h6>
-				<p><strong>Harvest Software Solutions</strong>, Jacksonville, Flordia</p>
-				<p><strong>06/2023 - 09/2023</strong>
-                            <p class="subtitle">Real-time Ad Campaign Optimization:<br>
-                                • Leveraged data-driven insights and state-of-the-art machine learning techniques to enhance the effectiveness of ad
-                                  campaigns and drive increased revenue. Acquired and extracted data from Aniview and CMCBeacons using APIs.<br>
-                                • Handled datasets with over 5 million rows, involving EDA to uncover patterns, relationships within the data, data cleaning,
-                                  outlier handling, data format correction. Calculated CPM and added it as a critical metric to the dataset.<br>
-                                • Employed data visualization, summary statistics, and hypothesis testing to gain insights into ad campaign performance. <br>
-                                • Utilized XGBoost for predictive modeling and achieved a low Mean Squared Error (MSE). Implemented a 5-fold cross-validation approach to evaluate model performance and avoid overfitting.<br>
-                                • Leveraged H2O’s AutoML to automate model building processes, selecting the best-performing model for CPM prediction.<br>  
-                                • Employed AutoML tools to automate labor-intensive tasks, including feature engineering and hyperparameter tuning,
-                                  selecting the best-performing model for CPM prediction. 
-                            </p>
-                        <hr>
-                        <div>
-                            <h6 class="title text-danger">Application Development Associate</h6>
-				<p><strong>Accenture Solutions Pvt. Ltd.</strong>, Hyderabad, India</p>
-                            	<p><strong>08/2021-08/2022</strong></p>
-                            <p class="subtitle"><strong>Database Analyst</strong>: Regeneron Inc - <br>
-                                Data Analysis:<br>
-                                • Leveraged Athena and Redshift for clients data analysis to detect two-thirds of integrity exceptions, enhancing process efficiencies. <br>
-                                • Designed Python pandas data pipelines to automate the script, reducing support calls by 50% and ensuring efficient storage and maintenance of customer campaigns. <br>
-                                • Led a cross-functional team of 3 in Agile development, driving enhancement in data visualization. <br>
-                                Customer Data Warehousing: <br>
-                                • Performed business analysis, leading to enhanced data warehousing, improved data accuracy, and a substantial reduction in data processing duration. <br>
-                                • Developed SQL queries via SQL Workbench to cater the business needs, thereby boosting data quality and precision. <br>
-                                • Implemented technological solutions, including DDL updates and the deployment of data into production servers. <br>
-                                • Tools Used: Python, Pandas, AWS Services - Athena, Redshift, S3, Lambda, RDS, SQL Workbench, Tableau, Tensor Flow, PyTorch. 
-                            </p>
-                        </div>
-                        <hr>
-                        <div>
-                            <h6 class="title text-danger">Research Project </h6>
-                            <p><strong>01/2021-06/2021</strong></p>
-                            <p class="subtitle"><strong>Self Driving Cars Using Image Processing and Deep Learning</strong> - <br>
-                                I designed a self-driving car system that combines image processing and deep learning. <br>
-                                By analyzing real-time images, the system detects objects, interprets traffic signs, and navigates safely using neural network-driven decision-making. <br>
-                                Employed computer vision algorithms for object detection, lane detection, and obstacle avoidance, enhancing the car's ability to identify pedestrians, vehicles, and traffic signs from captured images.  
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-	    
-<div class="row">
-<div class="col-md-12">
-	<div class="container">
-    <div class="card">
-       <div class="card-header">
-            <div class="mt-2">
-                <h4>Education</h4>
-                <span class="line"></span>  
-            </div>
-        </div>
-        <div class="card-body">
-            <div>
-                <h6 class="title text-danger">09/2022 - 05/2024</h6>
-                <p>Masters in Data Science @ Rutgers University, New Brunswick</p>
-                <p class="subtitle">Key concepts : Data Mining, Statistical Inference, Statistical Modelling, Statistical Learning, Database Applicatons, Regression & Time Series Analysis, Data Wrangling, Natural Language Processing. <br>
-                Executed diverse projects encompassing Machine Learning, Statistical Analysis, Predictive Analysis, Statistical Modeling, and Time Series Analysis.<br>
-                Examples include "Bayesian Classification on Diabetes dataset" showcasing ML prowess, "Auto Insurance Fraud Detection," leveraging Statistical Modelling, and "Analysis of deaths due to drug overdose," utilizing R programming for insightful data visualization and analysis.<br>   
-                </p>
-            </div>
-            <hr>
-            <div>
-                <h6 class="title text-danger">2017 - 2021</h6>
-                <p>Bachelors in Electrical & Electronics @ Andhra University, India</p>
-                <p class="subtitle"> Expertise Domain : Data Structures and Algorithms, Computer Architecture Organization, Database Management Systems, and programming languages such as MATLAB, C++, and Python. <br>
-                Engaged in projects such as creating an Air Quality Monitoring Device, involving the application of concepts like IoT, Arduino Programming, and microprocessor integration. <br>
-                Additionally, contributed to a 1-phase off-grid inverter project, leveraging MATLAB for implementation. <br>
-                </p>
-            </div>
-            <hr>
-            <div>
-                <h6 class="title text-danger">2015 - 2017</h6>
-                <p>High School Degree in Maths</p>
-                <p class="subtitle"> Expertise Domain : Mathematics, Statistics, C Programming, MS Office.</p>
-            </div>
-        </div>
-    </div>
-	</div>
-</div>
-</div>
-	    <div class="row">
-<div class="col-lg-12">
-	<div class="container">
-    <div class="card">
-       <div class="card-header">
-            <div class="pull-left">
-                <h4 class="mt-2">Skills</h4>
-                <span class="line"></span>  
-            </div>
-        </div>
-        <div class="card-body pb-2">
-            <div>
-                <h6>Data Science & Analytics</h6>
-                <p class="subtitle">Data Mining, Statistical Modelling & Computing, Data Modelling, Quantitative Analysis, Exploratory Data Analysis, Time Series Analysis, Data Wrangling.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div>
-                <h6>Machine Learning</h6>
-                <p class="subtitle">Supervised Learning, Unsupervised Learning, Reinforcement Learning, Ensemble Methods, Model Evaluation and Perfomance Metrics.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 85%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div>
-                <h6>Deep Learning</h6>
-                <p class="subtitle">Clustering, NLP - NLTK, Keras, Hugging Face Transformers, spaCy, LLM’s, NER, Computer Vision, Recommender Systems, Language Models, CNN, RNN, Transformers, LSTM, BERT, GPT.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div>
-                <h6>Computing and Programming</h6>
-                <p class="subtitle">Scala, PyTorch, TensorFlow, Python, R, Spark, C++.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div>
-                <h6>Cloud Services</h6>
-                <p class="subtitle">AWS Athena, Amazon Lambda, Redshift, Amazon S3, RDS, RedCap, Dynamo DB, GCP: BigQuery, Google Cloud Storage, Google Cloud Functions, Google Cloud Dataproc</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 80%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div>
-                <h6>Database Management</h6>
-                <p class="subtitle">SQL, PL/SQL, Postgres, MongoDb, SQLite, Amazon RDS, Redshift.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-            <div>
-                <h6>Framework and Technologies</h6>
-                <p class="subtitle">HTML, CSS, JavaScript, Bootstrap, Django.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: 90%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-	</div>
-	</div>
-</div>
+        <div class="sidebar-info">
 
-<div class="col-lg-12">
-	<div class="container">
-    <div class="card">
-       <div class="card-header">
-            <div class="pull-left">
-                <h4 class="mt-2">Leadership</h4>
-                <span class="line"></span>  
-            </div>
-        </div>
-        <div class="card-body pb-2">
-            <div>
-               <h6>Vice President - Membership @ ToastMasters International</h6>	
-		<p>As Vice President - Membership at Toastmasters International, I focused on monitoring membership levels and collaborating with the executive committee to devise effective solutions. My responsibilities included conducting membership-building programs, leading recruitment efforts, and ensuring adherence to accountability standards while staying informed about club communications.</p>
+          <figure class="avatar-box">
+            <style>
+              .name {
+                    line-height: 0.5;
+                    }
+            </style>
+            <img src="./assets/images/my-image1.png" alt="Jayanth Dasamantharao" width="80" style="mix-blend-mode: multiply; border: 2px solid black;">
+          </figure>
 
-		<p><strong>Skills Acquired:</strong></p>
-		<ul>
-  			<li>Marketing and networking proficiency</li>
-  			<li>Strategic planning and critical thinking</li>
-  			<li>Effective communication and problem-solving</li>
- 			<li>Organizational skills and positive collaboration</li>
-  			<li>Compliance with standard procedures</li>
-		</ul>
-            </div>
-        </div>
-    </div>
-	</div>
-</div>
-
-  </section>
-<!-- MADE CHANGES HERE -->
-
-    <!-- <section class="section bg-custom-gray" id="price">
-        <div class="container">
-            <h1 class="mb-5"><span class="text-danger">Packs</span> Pricing</h1>
-            <div class="row align-items-center">
-                <div class="col-md-6 col-lg-3">
-                    <div class="price-card text-center mb-4">
-                        <h3 class="price-card-title">Free</h3>
-                        <div class="price-card-cost">
-                            <sup class="ti-money"></sup>
-                            <span class="num">0</span>
-                            <span class="date">MO</span>
-                        </div>
-                        <ul class="list">
-                            <li class="list-item">5 <span class="text-muted">Project</span></li>
-                            <li class="list-item">1GB <span class="text-muted">Storage</span></li>
-                            <li class="list-item"><span class="text-muted">No Domain</span></li>
-                            <li class="list-item">1 <span class="text-muted">User</span></li>
-                        </ul>
-                        <button class="btn btn-primary btn-rounded w-lg">Subscribe</button>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="price-card text-center mb-4">
-                        <h3 class="price-card-title">Basic</h3>
-                        <div class="price-card-cost">
-                            <sup class="ti-money"></sup>
-                            <span class="num">10</span>
-                            <span class="date">MO</span>
-                        </div>
-                        <ul class="list">
-                            <li class="list-item">50 <span class="text-muted">Project</span></li>
-                            <li class="list-item">10GB <span class="text-muted">Storage</span></li>
-                            <li class="list-item">1<span class="text-muted">Domain</span></li>
-                            <li class="list-item">5 <span class="text-muted">User</span></li>
-                        </ul>
-                        <button class="btn btn-primary btn-rounded w-lg">Subscribe</button>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="price-card text-center price-card-requried mb-4">
-                        <h3 class="price-card-title">Exclusive</h3>
-                        <div class="price-card-cost">
-                            <sup class="ti-money"></sup>
-                            <span class="num">25</span>
-                            <span class="date">MO</span>
-                        </div>
-                        <ul class="list">
-                            <li class="list-item">150 <span class="text-muted">Project</span></li>
-                            <li class="list-item">15GB <span class="text-muted">Storage</span></li>
-                            <li class="list-item">5<span class="text-muted"> Domain</span></li>
-                            <li class="list-item">15<span class="text-muted">User</span></li>
-                        </ul>
-                        <button class="btn btn-primary btn-rounded w-lg">Subscribe</button>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="price-card text-center mb-4">
-                        <h3 class="price-card-title">Pro</h3>
-                        <div class="price-card-cost">
-                            <sup class="ti-money"></sup>
-                            <span class="num">99</span>
-                            <span class="date">MO</span>
-                        </div>
-                        <ul class="list">
-                            <li class="list-item">500 <span class="text-muted">Project</span></li>
-                            <li class="list-item">1000GB <span class="text-muted">Storage</span></li>
-                            <li class="list-item">10<span class="text-muted"> Domain</span></li>
-                            <li class="list-item">Unlimite<span class="text-muted">User</span></li>
-                        </ul>
-                        <button class="btn btn-primary btn-rounded w-lg">Subscribe</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="section bg-dark py-5">
-        <div class="container text-center">
-            <h2 class="text-light mb-5 font-weight-normal">I Am Available For FreeLance</h2>
-            <button class="btn bg-primary w-lg" >Hire me</button>
-        </div>
-    </section> -->
-    
-    <!-- Projects Section
-    <section id="projects">
-        <div class="projects container">
-        <div class="projects-header">
-            <h1 class="section-title">Recent <span>Projects</span></h1>
-        </div>
-        <div class="all-projects">
-            <div class="project-item">
-            <div class="project-info">
-                <h1>Auto Insurance Fruad Detection <a href="https://github.com/JayanthDasamantharao/Auto-Insurance-Fraud-Detection"> 🔗 </a> </h1>
-                <p>[The classifiers used in this project are Random Forest, KNN, logistic regression, SVM, Decision Trees.]</p>
-                <br>
-                <p>The project aims to develop a machine learning model for identifying instances of auto insurance fraud. This task is challenging as fraudulent claims are rare, but an accurate model can significantly reduce losses for insurance companies. The study focuses on classifying fraudulent claims without knowledge of the specific type of fraud. The classifiers used in this project are Random Forest, KNN, logistic regression, SVM, Decision Trees.</p>
-            </div>
-            <div class="project-img">
-                <img src="assets/imgs/autoinsurance.webp" alt="img" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">  
-            </div>
-            </div>
-
-            <div class="project-item">
-                <div class="project-info">
-                <h1>Hoosier Rally <a href="#"> 🔗 </a></h1>
-                <p>[React JS, Node JS, Firebase Auth, Firebase Realtiem DB, Git, Twilio, HTML, CSS]</p>
-                <br>
-                <p>Designed and developed a user-friendly online event management portal for the Hoosiers to organise, watch out and register to events happening in indiana. Multiple sign-up options have been provided for user flexibility and has multi-factor authentication enabled to improve security. The dashboard has a calendar view and bookmark feature to improve the user experience</p>
-                <br>
-                </div>
-                <div class="project-img">
-                <img src="assets/imgs/autoinsurance.webp" alt="img">
-                </div>
-            </div>
-
-
-            <div class="project-item">
-            <div class="project-info">
-                <h1>Home Automation System <a href="https://github.com/surajgupta-git/NodeMCU-and-MQTT-based-Home-Automation-System">🔗</a> <a href="https://www.dropbox.com/s/zutwya44m4wquky/NodeMCU%20and%20MQTT%20based%20Home%20Automation%20System.pdf?dl=0">🧾 </a> </h1>
-                <br>
-                <p>Domain: Embedded Systems & IoT </p>
-                <p>Designed and developed an IoT system to control all the home appliances remotely. Used Mosquito MQTT as the messaging broker between the NodeMCU and the cloud. Developed an interactive control dashboard UI using HTML, CSS, WebSockets, Eclipse Paho JS library, jQuery and hosted using Firebase.</p>
-            </div>
-            <div class="project-img">
-                <img src="./img-2.png" alt="img">
-            </div>
-            </div>
-
-            <div class="project-item">
-                <div class="project-info">
-            <h1> Movie Store   <a href="https://github.com/surajgupta-git/Movie-Store/">🔗 </a> </h1>
-            <p>[React, Mongo DB, Express, Node, AWS]</p>
-            <br>
-                <p>Developed a MERN stack web application that displays the latest collection of movies and related information wherein the authenticated users can like a movie, mark their favourites and post reviews. Deployed on an AWS EC2 instance with NGINX as the frontend web server and node as the backend server along with a cloud Mongo DB cluster to store the movie data and AWS S3 bucket to store the Movie posters.</p>
-            </div>
-            <div class="project-img">
-                <img src="./img-3.jpg" alt="img">
-            </div>
-            </div>
-
-            <div class="project-item">
-            <div class="project-info">
-                <h1>Toxic Speech Classifier <a href="https://github.com/surajgupta-git/Toxic-Speech-Classifier"> 🔗 </a> </h1>
-                <p>Developed a Machine learning based web application that can classify user provided speech into various toxic categories like Normal, Toxic, Obscene, Threat, Insult, Hate using the Natural language Toolkit(NLTK) library in python. Used HTML & CSS for the front end and Flask as the backend framework. </p>
-            </div>
-            <div class="project-img">
-                <img src="./img-4.jpg" alt="img">
-            </div>
-            </div>
-
-            <div class="project-item">
-            <div class="project-info">
-                <h1>Employee Skill Tracker <a href="https://github.com/surajgupta-git/employee-skills-tracker"> 🔗 </a> </h1>
-                <p>Developed a full-stack web application prototype that can be leveraged as a skill repository of all employees in a company. Backend is implemented using Spring Boot, MySQL Database and JPA for the ORM. Frontend is implemented using React JS along with Axios library for the http requests.</p>
-            </div>
-            <div class="project-img">
-                <img src="./img-5.jpg" alt="img">
-            </div>
-            </div>
-        </div>
-        </div>
-    </section>
-    End Projects Section -->
-
-
-    <!-- Portfolio Section -->  
-    <section class="section bg-custom-gray" id="portfolio">
-        <div class="container">
-            <h1 class="mb-5"><span class="text-danger">Recent</span> Projects</h1>
-            <div class="portfolio">
-                <div class="filters">
-                    <a href="#" data-filter=".new" class="active">
-                        1
-                    </a>
-                    <a href="#" data-filter=".advertising">
-                        2
-                    </a>
-                    <a href="#" data-filter=".branding">
-                        3
-                    </a>
-                </div>
-                <div class="portfolio-container"> 
-                    <div class="col-md-6 col-lg-4 new">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/autoinsurance1.png" class="img-fluid">
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/autoinsurance1.png" target=_new></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Auto Insurance Fraud Detection<a href="https://github.com/JayanthDasamantharao/Auto-Insurance-Fraud-Detection" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">The project aims to develop a machine learning model for identifying instances of auto insurance fraud. The classifiers used in this project are Random Forest, KNN, logistic regression, SVM, Decision Trees.</p>
-                                </div>
-                            </div>   
-                        </div>             
-                    </div>
-                    <div class="col-md-6 col-lg-4 new">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/walmart1.png" class="img-fluid">   
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/walmart1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Walmart Sales Forecasting <a href="https://github.com/JayanthDasamantharao/Time-Series-Analysis" target="_new"> 🔗 </a>  </h6>
-                                    <p class="subtitle">Develop accurate sales prediction model for Walmart's 45 stores. Enhance supply chain, inventory management, and revenue optimization. Time Series Analysis; Multivariate Analysis; Univariate Analysis.</p>
-                                </div>
-                            </div>
-                        </div>                                                    
-                    </div>
-                    <div class="col-md-6 col-lg-4 new">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/bayesian1.png" class="img-fluid">                        
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/bayesian1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Bayesian Classification on Diabetes data <a href="https://github.com/JayanthDasamantharao/Bayesianclassification-Diabetesdata" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">Utilized PyMC3 in Python to implement prior distributions, perform simulations, and estimate beta coefficients, enhancing the accuracy of predictions.</p>
-                                </div>
-                            </div> 
-                        </div>
-                    </div>            
-                    <div class="col-md-6 col-lg-4 advertising">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/carprice1.png" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">                         
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/carprice1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Car Price Analysis <a href="https://github.com/JayanthDasamantharao/Car-Price-Analysis-Regression-techniques" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">Project is about predicting used car prices using attributes. It includes data preprocessing, model selection, and training using linear regression techniques, with an emphasis on achieving an accurate prediction model for car prices.</p>
-                                </div>
-                            </div>    
-                        </div>              
-                    </div> 
-                    <div class="col-md-6 col-lg-4 advertising">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/twitter1.png" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">       
-                           <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/twitter1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Twitter Database <a href="https://github.com/JayanthDasamantharao/Twitter-Database" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">To create a tweet search engine using both relational and non-relational datastores. Relational datastores, managed by RDBMS, excel in querying structured data with fixed schemas.</p>
-                                </div>
-                            </div>
-                        </div>                                                       
-                    </div> 
-                    <div class="col-md-6 col-lg-4 advertising"> 
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/drugdeaths1.png" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">            
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/drugdeaths1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Drug Overdose Deaths <a href="https://github.com/JayanthDasamantharao/Drug-Overdose-Deaths" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">My objective is to reveal the drivers and trends of drug abuse in Connecticut by analyzing demographic correlations, temporal patterns, and identifying key contributing factors using R programming.</p>
-                                </div>
-                            </div>
-                        </div>           
-                    </div>
-                    <div class="col-md-6 col-lg-4 branding">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/spam1.png" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">                      
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/spam1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Spam detection using TensorFlow <a href="https://github.com/JayanthDasamantharao/Spam-detection-using-TensorFlow" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">Development of multiple deep learning models using TensorFlow to tackle SMS spam detection. Objective is to assess and compare the performance metrics of various models.</p>
-                                </div>
-                            </div>
-                        </div>                                                      
-                    </div> 
-                    <div class="col-md-6 col-lg-4 branding">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/disease.jpeg" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">  
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/disease.jpg"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Disease Prediction using ML <a href="https://github.com/JayanthDasamantharao/Disease-Predection-Using-ML" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">This project aims to develop a robust machine learning model for predicting human diseases based on their symptoms. The Support Vector Classifier, Naive Bayes Classifier, and Random Forest Classifier are employed in this project. Model quality is assessed using a confusion matrix.</p>
-                                </div>
-                            </div>
-                        </div>                                                     
-                    </div>
-                    <div class="col-md-6 col-lg-4 branding">
-                        <div class="portfolio-item">
-                            <img src="assets/imgs/selfdriving1.png" class="img-fluid" alt="Download free bootstrap 4 admin dashboard, free boootstrap 4 templates">          
-                            <div class="content-holder">
-                                <a class="img-popup" href="assets/imgs/selfdriving1.png"></a>
-                                <div class="text-holder">
-                                    <h6 class="title">Self Driving Cars Using Image Processing and Deep Learning. <a href="https://journal.ijresm.com/index.php/ijresm/article/view/1723/1662" target="_new"> 🔗 </a> </h6>
-                                    <p class="subtitle">It is implemented using AI, CV & Neural Networks. It leverages various features like mapping, tracking, and local planning to achieve lane changes, parking, and U-turns, offering improved mobility intelligence for driving.</p>
-                                </div>
-                            </div>
-                        </div>                                                   
-                    </div>
-                </div> 
-            </div> 
-        </div>            
-    </section>
-    <!-- End of portfolio section -->
-
-   
-  <!-- PORTFOLIO SAMPLE
-
-    <section class="portfolio_section ">
-        <div class="container">
-          <div class="heading_container heading_center">
-            <h2>
-              Our Work Portfolio
-            </h2>
+          <div class="info-content">
+            <h1 class="name" title="Jayanth Dasamantharao">Jayanth</h1>
+            <h1 class="name" title="Jayanth Dasamantharao">Dasamantharao</h1>
+            <p class="title">Data Scientist</p>
+            <p class="gap"></p>
+            <p class="title">Data Analyst</p>
+            <p class="gap"></p>
+            <p class="title">ML Engineer</p>
           </div>
-          <div class="carousel-wrap ">
-            <div class="filter_box">
-              <nav class="owl-filter-bar">
-                <a href="#" class="item active" data-owl-filter="*">All</a>
-                <a href="#" class="item" data-owl-filter=".decorative">DECORATIVE</a>
-                <a href="#" class="item" data-owl-filter=".facade">FACADES </a>
-                <a href="#" class="item" data-owl-filter=".perforated">PERFORATED
-                </a>
-                <a href="#" class="item" data-owl-filter=".railing">RAILINGS </a>
-              </nav>
-            </div>
-          </div>
+
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Contacts</span>
+
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
+
         </div>
-        <div class="owl-carousel portfolio_carousel">
-          <div class="item decorative">
-            <div class="box">
-              <div class="img-box">
-                <img src="assets/imgs/autoinsurance.webp" alt="" />
-                <div class="btn_overlay">
-                  <a href="" class="">
-                    See More
-                  </a>
-                </div>
+
+        <div class="sidebar-info_more">
+
+          <div class="separator"></div>
+
+          <ul class="contacts-list">
+
+            <li class="contact-item">
+
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
               </div>
-            </div>
-          </div>
-          <div class="item facade">
-            <div class="box">
-              <div class="img-box">
-                <img src="assets/imgs/autoinsurance.webp" alt="" />
-                <div class="btn_overlay">
-                  <a href="" class="">
-                    See More
-                  </a>
-                </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+
+                <a href="mailto:dasamantharao.jayanth@rutgers.edu" class="contact-link">dasamantharao.jayanth@rutgers.edu</a>
               </div>
-            </div>
-          </div>
-          <div class="item perforated decorative">
-            <div class="box">
-              <div class="img-box">
-                <img src="assets/imgs/autoinsurance.webp" alt="" />
-                <div class="btn_overlay">
-                  <a href="" class="">
-                    See More
-                  </a>
-                </div>
+
+            </li>
+
+            <li class="contact-item">
+
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
               </div>
-            </div>
-          </div>
-          <div class="item railing">
-            <div class="box">
-              <div class="img-box">
-                <img src="assets/imgs/autoinsurance.webp" alt="" />
-                <div class="btn_overlay">
-                  <a href="" class="">
-                    See More
-                  </a>
-                </div>
+
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
+
+                <a href="tel:+18483135617" class="contact-link">+1 (848) 313-5617</a>
               </div>
-            </div>
-          </div>
-        </div>
-    </section> 
-End of Portfolio -->
 
-    <!-- BLOG
-    
-    <section class="section" id="blog">
-        <div class="container">
-            <h2 class="mb-5">Latest <span class="text-danger">News</span></h2>
-            <div class="row">
-                <div class="blog-card">
-                    <div class="img-holder">
-                        <img src="assets/imgs/blog1.jpg" alt="Download free bootstrap 4 landing page, free boootstrap 4 templates, Download free bootstrap 4.1 landing page, free boootstrap 4.1.1 templates, meyawo Landing page">
-                    </div>
-                    <div class="content-holder">
-                        <h6 class="title">Consectetur adipisicing elit</h6>
+            </li>
 
-                        <p class="post-details">
-                            <a href="#">By: Admin</a>
-                            <a href="#"><i class="ti-heart text-danger"></i> 234</a>
-                            <a href="#"><i class="ti-comment"></i> 123</a>
-                        </p>
-                        
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet nesciunt qui sit velit delectus voluptates, repellat ipsum culpa id deleniti. Rerum debitis facilis accusantium neque numquam mollitia modi quasi distinctio.</p>
+            <li class="contact-item">
 
-                        <p><b>Necessitatibus nihil impedit! Ex nisi eveniet, dolor aliquid consequuntur repudiandae.</b></p>
-                        <p>Magnam in repellat enim harum omnis aperiam! Explicabo illo, commodi, dolor blanditiis cupiditate harum nisi vero accusamus laudantium voluptatibus dolores quae obcaecati.</p>
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
 
-                        <a href="#" class="read-more">Read more <i class="ti-angle-double-right"></i></a>
-                    </div> -- blog wrapper end
-                </div>
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
 
-            -- blog card
-                <div class="blog-card">
-                    <div class="img-holder">
-                        <img src="assets/imgs/blog2.jpg" alt="Download free bootstrap 4 landing page, free boootstrap 4 templates, Download free bootstrap 4.1 landing page, free boootstrap 4.1.1 templates, meyawo Landing page">
-                    </div>
-                    <div class="content-holder">
-                        <h6 class="title">Explicabo illo</h6>
+                <time datetime="1998-03-04">November 25</time>
+              </div>
 
-                        <p class="post-details">
-                            <a href="#">By: Admin</a>
-                            <a href="#"><i class="ti-heart text-danger"></i> 456</a>
-                            <a href="#"><i class="ti-comment"></i> 264</a>
-                        </p>
-                        
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Impedit excepturi laborum enim, vitae ipsam atque eum, ad iusto consequuntur voluptas, esse doloribus. Perferendis porro quisquam vitae exercitationem aliquid, minus eos laborum repudiandae, cumque debitis iusto omnis praesentium? Laborum placeat sit adipisci illum tempore maxime, esse qui quae? Molestias excepturi corporis similique doloribus. Esse vitae earum architecto nulla non dolores illum at perspiciatis quod, et deleniti cupiditate reiciendis harum facere, delectus eum commodi soluta distinctio sit repudiandae possimus sunt. Ipsum, rem.</p>
+            </li>
 
-                        <a href="#" class="read-more">Read more <i class="ti-angle-double-right"></i></a>
-                    </div>
-                </div> -- end of blog wrapper
-                -- blog-card
-                <div class="blog-card">
-                    <div class="img-holder">
-                        <img src="assets/imgs/blog3.jpg" alt="Download free bootstrap 4 landing page, free boootstrap 4 templates, Download free bootstrap 4.1 landing page, free boootstrap 4.1.1 templates, meyawo Landing page">
-                    </div>
-                    <div class="content-holder">
-                        <h4 class="title">Porro Quisqua</h4>
+            <li class="contact-item">
 
-                        <p class="post-details">
-                            <a href="#">By: Admin</a>
-                            <a href="#"><i class="ti-heart text-danger"></i> 431</a>
-                            <a href="#"><i class="ti-comment"></i> 312</a>
-                        </p>
-                        
-                        <p> consectetur adipisicing elit. Impedit excepturi laborum enim, vitae ipsam atque eum, ad iusto consequuntur voluptas, esse doloribus. Perferendis porro quisquam vitae exercitationem aliquid, minus eos laborum repudiandae, cumque debitis iusto omnis praesentium? Laborum placeat sit adipisci illum tempore maxime, esse qui quae? Molestias excepturi corporis similique doloribus. Esse vitae earum architecto nulla non dolores illum at perspiciatis quod, et deleniti cupiditate reiciendis harum facere, delectus eum commodi soluta distinctio sit repudiandae possimus sunt. Ipsum, rem.</p>
+              <div class="icon-box">
+                <ion-icon name="location-outline"></ion-icon>
+              </div>
 
-                        <a href="#" class="read-more">Read more <i class="ti-angle-double-right"></i></a>
-                    </div>
-                </div>
+              <div class="contact-info">
+                <p class="contact-title">Location</p>
 
-            </div>
-        </div>
-    </section>
+                <address>New Brunswick, NJ, USA</address>
+              </div>
 
-    END OF BLOG -->
+            </li>
 
-    <div class="section contact" id="contact">
-        <div id="map" class="map"></div>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="contact-form-card">
-                        <h4 class="contact-title">Send a message</h4>
-                        <form action="https://formspree.io/f/mvojypab" method="POST">
-                            <div class="form-group">
-                                <input  class="form-control" name="name" placeholder="Name *" required>
-                            </div>
-                            <div class="form-group">
-                                <input class="form-control" name="email" placeholder="Email *" required>
-                            </div>
-                            <div class="form-group">
-                                <textarea class="form-control" name="message" placeholder="Message *" rows="7" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="form-control btn btn-primary" onclick="displayThankYou(event)">Send</button>
-                            </div>
-                        </form>
-			    <div id="thankYouMessage"></div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="contact-info-card">
-                        <h4 class="contact-title">Get in touch</h4>
-                        <div class="row mb-2">
-                            <div class="col-1 pt-1 mr-1">
-                                <i class="ti-mobile icon-md"></i>
-                            </div>
-                            <div class="col-10 ">
-                                <h6 class="d-inline">Phone : <br> <span class="text-muted">+1 (848) 313-5617</span></h6>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-1 pt-1 mr-1">
-                                <i class="ti-map-alt icon-md"></i>
-                            </div>
-                            <div class="col-10">
-                                <h6 class="d-inline">Location :<br> <span class="text-muted">New Brunswick, New Jersey, 08901.</span></h6>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-1 pt-1 mr-1">
-                                <i class="ti-envelope icon-md"></i>
-                            </div>
-                            <div class="col-10">
-                                <h6 class="d-inline">Email :<br> <span class="text-muted">jayanthdasamantharao@gmail.com <br> dasamantharao.jayanth@rutgers.edu </span></h6>
-                            </div>
-                        </div>
-                        <ul class="social-icons pt-4">
-                            <li class="social-item"><a class="social-link text-dark" href="https://www.facebook.com/kartheek1456?mibextid=ZbWKwL" target="_new"><i class="ti-facebook" aria-hidden="true"></i></a></li>
-                            <li class="social-item"><a class="social-link text-dark" href="https://twitter.com/jay_ka_25?t=tOkykhijsbtm-oooRsHhow&s=09" target="_new"><i class="ti-twitter" aria-hidden="true"></i></a></li>
-                            <li class="social-item"><a class="social-link text-dark" href="mailto:jayanthdasamantharao@gmail.com" target="_new"><i class="ti-email" aria-hidden="true"></i></a></li>
-                            <li class="social-item"><a class="social-link text-dark" href="https://instagram.com/kartheekjay?utm_source=qr&igshid=NGExMmI2YTkyZg%3D%3D" target="_new"><i class="ti-instagram" aria-hidden="true"></i></a></li>
-                            <li class="social-item"><a class="social-link text-dark" href="https://github.com/JayanthDasamantharao" target="_new"><i class="ti-github" aria-hidden="true"></i></a></li>
-                            <li class="social-item"><a class="social-link text-dark" href="https://www.linkedin.com/in/djayanth/" target="_new"><i class="ti-linkedin" aria-hidden="true"></i></a>
-                        </ul> 
-                    </div>
-                </div>
-            </div>
+          </ul>
+
+          <div class="separator"></div>
+
+          <ul class="social-list">
+
+            <li class="social-item">
+              <a href="https://www.linkedin.com/in/djayanth/" class="social-link" target="_blank">
+                <ion-icon name="logo-linkedin"></ion-icon>
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="https://github.com/JayanthDasamantharao" class="social-link" target="_blank">
+                <ion-icon name="logo-github"></ion-icon>
+              </a>
+            </li>
+
+            <li class="social-item">
+              <a href="https://instagram.com/kartheekjay?utm_source=qr&igshid=NGExMmI2YTkyZg%3D%3D" class="social-link" target="_blank">
+                <ion-icon name="logo-instagram"></ion-icon>
+              </a>
+            </li>
+
+          </ul>
 
         </div>
-    </div>
-    <footer class="footer py-3">
-        <div class="container">
-            <p class="small mb-0 text-light">
-                &copy; <script>document.write(new Date().getFullYear())</script> All Rights Reserved. <a href="https://github.com/JayanthDasamantharao" target="_blank"><span class="text-danger" title="Bootstrap 4 Themes and Dashboards">Jayanth Dasamantharao</span></a> 
+
+      </aside>
+
+
+      <!--
+        - #main-content
+      -->
+
+      <div class="main-content">
+
+        <!--
+          - #NAVBAR
+        -->
+
+        <nav class="navbar">
+
+          <ul class="navbar-list">
+
+            <li class="navbar-item">
+              <button class="navbar-link  active" data-nav-link>About</button>
+            </li>
+
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Resume</button>
+            </li>
+
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Projects</button>
+            </li>
+
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Research</button>
+            </li>
+
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Contact</button>
+            </li>
+
+          </ul>
+
+        </nav>
+
+
+        <!--
+          - #ABOUT
+        -->
+
+        <article class="about  active" data-page="about">
+
+          <header>
+            <h2 class="h2 article-title">About me</h2>
+          </header>
+
+          <section class="about-text">
+            <p>
+              Hello, I'm Jayanth Dasamantharao, an aspiring Data Scientist, on a journey of innovation and exploration. Currently I'm looking for full time positions in
+              <a class="about-p-highlight">Data Science</a>,
+              <a class="about-p-highlight">ML/DL Engineering</a>. 
+              I will be completing my Master of Science degree in Data Science at 
+              <a class="about-p-highlight" href="https://newbrunswick.rutgers.edu/" target="_blank">Rutgers University - New Brunswick</a> in May,2024. 
+              My academic journey revolved around advanced coursework, encompassing topics such as Statistical Modeling, Machine Learning, Neural Networks, 
+              Natural Language Processing, Data Wrangling and more.
             </p>
-        </div>
-    </footer>
-
-	<!-- core  -->
-    <script src="assets/vendors/jquery/jquery-3.4.1.js"></script>
-    <script src="assets/vendors/bootstrap/bootstrap.bundle.js"></script>
-
-    <!-- bootstrap 3 affix -->
-    <script src="assets/vendors/bootstrap/bootstrap.affix.js"></script>
-
-    <!-- Isotope  -->
-    <script src="assets/vendors/isotope/isotope.pkgd.js"></script>
-    
-    <!-- Google mpas -->
-<!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8eq6ElDGbO2-VPYAPcqX6peY3T9XXL5A"></script> -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAf5SjOcxQ7OuW_sU0gSdljIT43bwjn6V4&callback=initMap"></script>
+            <p>
+              With more than 3 years of experience including research, industry and academia, I bring a unique blend of expertise in SQL,
+              Machine Learning, Deep Learning and Data Engineering. <b><i>I strive to make a significant impact on the big stage by leveraging my experience, domain knowledge, and adaptive approach to work culture.</i></b>
+      
+            </p>
+          </section>
 
 
-    <!-- JohnDoe js -->
-    <script src="assets/js/johndoe.js"></script>
+          <!--
+            - service
+          -->
+
+          <section class="service">
+
+            <h3 class="h3 service-title">My interests</h3>
+
+            <ul class="service-list">
+
+              <li class="service-item">
+
+                <div class="service-icon-box">
+                  <img src="./assets/images/icon-dev.svg" alt="Web development icon" width="40">
+                </div>
+
+                <div class="service-content-box">
+                  <h4 class="h4 service-item-title">Data Science</h4>
+
+                  <p class="service-item-text">
+                    I extract insights from both structured & unstructured data using statistical methods, machine learning, 
+                    and programming to solve complex problems & drive business decisions.
+                  </p>
+                </div>
+
+              </li>
+
+              <li class="service-item">
+
+                <div class="service-icon-box">
+                  <img src="./assets/images/AI.svg
+                  " alt="AI icon" width="40">
+                </div>
+
+                <div class="service-content-box">
+                  <h4 class="h4 service-item-title">Artificial Intelligence</h4>
+
+                  <p class="service-item-text">
+                  I excel in developing algorithms, models to enable machines learn from data, 
+                  understand natural language, recognize image patterns and autonomous decision making.
+                  </p>
+                </div>
+
+              </li>
+
+              <li class="service-item">
+
+                <div class="service-icon-box">
+                  <img src="./assets/images/analytics_col.png" alt="Research icon" width="40">
+                </div>
+
+                <div class="service-content-box">
+                  <h4 class="h4 service-item-title">Research</h4>
+
+                  <p class="service-item-text">
+                    I delve into cutting-edge methods, develop innovative solutions, and contribute to 
+                    advancing the field by applying data science to solve real-world challenges.
+                  </p>
+                </div>
+              </li>
+
+              <li class="service-item">
+                <div class="service-icon-box">
+                  <img src="./assets/images/dataanalytics.svg" alt="camera icon" width="40">
+                </div>
+
+                <div class="service-content-box">
+                  <h4 class="h4 service-item-title">Data Analytics</h4>
+
+                  <p class="service-item-text">
+                    I find joy in unraveling insights and patterns within datasets. Proficient in statistical analysis 
+                    and skilled in utilizing tools like SQL, Tableau for interactive Visualization.
+                    </p>
+                </div>
+
+              </li>
+
+            </ul>
+
+          </section>
+
+        </article>
+
+
+        <!--
+          - #RESUME
+        -->
+
+        <article class="resume" data-page="resume">
+
+          <header>
+            <h2 class="h2 article-title"><a class="about-p-highlight" href="https://journal.ijresm.com/index.php/ijresm/article/view/1723" target="_blank">Resume</a></h2>
+          </header>
+
+          <section class="timeline">
+
+            <div class="title-wrapper">
+              <div class="icon-box">
+                <ion-icon name="book-outline"></ion-icon>
+              </div>
+
+              <h3 class="h3">Education</h3>
+            </div>
+
+            <ol class="timeline-list">
+
+              <li class="timeline-item">
+
+                <h4 class="h4 timeline-item-title">Rutgers University
+                  <span class="right-align">New Brunswick, NJ, USA</span>
+                </h4>
+                
+                <span class="program">Masters of Science in Statistics - Data Science
+                  <span class="right-align-gold">Sept, 2022 - May, 2024</span>
+                </span>
+
+                <p class="timeline-text">
+                  Statistical Modeling, Stat Learning, Neural Networks, Machine
+                  Learning, Data Structures and Algorithms(Python), Database Management, Data Wrangling (R), NLP, Data Mining.
+                </p>
+
+              </li>
+
+              <li class="timeline-item">
+
+                <h4 class="h4 timeline-item-title">Andhra University
+                  <span class="right-align">Visakhapatnam, AP, India</span>
+                </h4>
+
+                <span class="program">B.Tech in Electrical and Electronics Engineering
+                  <span class="right-align-gold">Jul, 2016 - Sep, 2020</span>
+                </span>
+
+                <p class="timeline-text">
+                  Data Structures and Algorithms, Object-Oriented Programming, Matlab, Python.
+                </p>
+
+              </li>
+
+            </ol>
+
+          </section>
+
+          <section class="timeline">
+
+            <div class="title-wrapper">
+              <div class="icon-box">
+                <ion-icon name="book-outline"></ion-icon>
+              </div>
+
+              <h3 class="h3">Experience</h3>
+            </div>
+
+            <ol class="timeline-list">
+
+              <li class="timeline-item">
+
+                <h4 class="h4 timeline-item-title">Harvest Software Solutions
+                  <span class="right-align">Jacksonville, FL, US</span>
+                </h4>
+
+                <span class="program">Data Science Intern
+                  <span class="right-align-gold">June, 2023 - Sept, 2023</span>
+                </span>
+
+                <ul>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Conducted real-time <b>data extraction through APIs</b>, retrieving information from Aniview. 
+                      Managed and analyzed datasets exceeding 5 million rows, performing thorough <b>exploratory data analysis (EDA)</b> and 
+                      incorporating Cost Per Mile (CPM) metrics for comprehensive performance evaluations.
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Executed <b>data analysis</b> using advanced visualization, summary statistics, and hypothesis testing to extract 
+                      valuable insights into ad campaign performance.
+                    </p>
+                  </li>
+
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Developed <b>predictive models</b>, implementing XGBoost with a focus on minimizing Mean Squared Error (MSE). 
+                      Applied a <b>k-fold cross-validation</b> approach to assess and mitigate overfitting risks. 
+                      Leveraged H2O's AutoML for automated model selection, optimizing CPM predictions.
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Employed automation and advanced techniques, utilizing <b>AutoML</b> for tasks like feature engineering and 
+                      hyperparameter tuning, ensuring the selection of optimal models for CPM prediction. 
+                      <b>Techniques applied</b> include XGBoost, K-means, BERT, plotly, matplotlib, NLTK, spaCy, pandas, numpy, and ARIMA.
+                    </p>
+                  </li>
+
+                  
+                </ul>
+
+              </li>
+
+              <li class="timeline-item">
+
+                <h4 class="h4 timeline-item-title">Rutgers University
+                  <span class="right-align">New Brunswick, NJ, US</span>
+                </h4>
+
+                <span class="program">Teaching Assistant
+                  <span class="right-align-gold">Oct, 2022 - May, 2024</span>
+                </span>
+
+                <ul>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      In my role as a teaching assistant for Statistics I, where we delved into essential concepts. 
+                      I facilitated a deep exploration of Confidence Intervals and Testing Hypotheses, covering topics 
+                      such as Population Proportion, Two Sample Inference, Chi-Square Tests (Goodness of Fit and Test for Association),
+                      ANOVA (Analysis of Variance), and provided a solid introduction to Regression.
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      As a teaching assistant for 'Intro to Stat for Business,' I guided students through fundamental concepts 
+                      such as Graphical Displays for Qualitative and Quantitative Data, Measures of Central Tendency, and 
+                      Measures of Dispersion. We explored advanced topics like Bivariate Data, Combinatorics, Naïve Set Theory, 
+                      Statistical Modelling and Basic Probability, providing a foundation for statistical analysis.
+                    </p>
+                  </li>
+
+                </ul>
+
+              </li>
+
+              <li class="timeline-item">
+
+                <h4 class="h4 timeline-item-title">Accenture Sol. Pvt. Ltd.
+                  <span class="right-align">Hyderabad, TG, India</span>
+                </h4>
+
+                <span class="program">Application Development Associate(Database Analyst)
+                  <span class="right-align-gold">June, 2021 - Aug, 2021</span>
+                </span>
+
+                <ul>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Conducted client data analysis utilizing advanced querying techniques in <b>Amazon Athena and Amazon Redshift.</b>
+                      Implemented <b>ETL ingestion in data pipeline for Regeneron, featuring data extraction, featuring data extraction</b> 
+                      methodologies that ensured optimal performance, data integrity, and seamless integration with downstream processes. 
+                      Automated <b>data pipelines with pandas</b>, achieving a 40% increase in efficiency and 50% decrease in errors.                 
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Skillfully managed tasks and updates in <b>JIRA</b>, ensuring streamlined teamwork and prompt issue resolution. 
+                      Streamlined <b>data management</b> processes within the <b>data warehousing</b> environment, implementing strategic 
+                      <b>DDL updates and deployment</b> strategies that resulted in a substantial 15% improvement in system reliability.
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Proficiently crafted <b>SQL</b> queries using SQL Workbench for data manipulation and in-depth analysis. 
+                      These queries were tailored to extract meaningful insights, optimizing data retrieval and providing a 
+                      solid foundation for informed decision-making. Coordinated cross-team collaboration for <b>deployments on 
+                      production servers</b> contributing to optimal system performance & functionality.
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Skills Obtained: Data Management, Data Warehousing, Advanced Data Visualization (Tableau), SQL, Problem Solving,
+                      Database Management, AWS (Amazon Web Services), Python (pandas).
+                    </p>
+                  </li>
+
+                </ul>
+
+              </li>
+
+              <li class="timeline-item">
+
+                <h4 class="h4 timeline-item-title">Research Paper
+                  <span class="right-align">Visakhapatnam, AP, India</span>
+                </h4>
+
+                <span class="program"><a class="about-p-highlight" href="https://journal.ijresm.com/index.php/ijresm/article/view/1723" target="_blank">Self Driving Cars Using Image Processing and Deep Learning  &#x1F517;</a>
+                  <span class="right-align-gold">Sept, 2021 - Jan, 2021</span>
+                </span>
+
+                <ul>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Implemented advanced computer vision techniques, to enhance the vehicle's perception and navigation capabilities. 
+                      Object detection algorithms, including YOLO and Faster R-CNN, were utilized to accurately identify and locate various elements 
+                      in the vehicle's surroundings, such as vehicles, pedestrians, traffic signs, and obstacles.                  
+                    </p>
+                  </li>
+
+                  <li class="timeline-text-ul">
+                    <p class="timeline-text-ul-item">
+                      Applied lane detection algorithms, by employing techniques like edge detection and Hough Transform, 
+                      enables the vehicle to navigate within its lane securely. We employed image segmentation methods, 
+                      such as Fully Convolutional Networks (FCNs), for partitioning images into semantic regions. 
+                      Depth estimation techniques, utilizing stereo vision and monocular depth estimation, 
+                      allowed the vehicle to gauge the 3D structure of its surroundings, crucial for assessing distances to obstacles. 
+                    </p>
+                  </li>
+
+                </ul>
+
+              </li>
+
+            </ol>
+
+          </section>
+
+          <section class="skill">
+
+            <h3 class="h3 skill-title">My skills</h3>
+
+            <!-- 
+              Languages 
+            -->
+
+            <h5 class="h4 skill-category">Languages</h5>
+
+            <ul class="skill-list">
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/python.png" alt="Python icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Python
+                </div>
+
+              </li>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/c.png" alt="C icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                C++
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/sql.png" alt="SQL icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  SQL
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/R.png" alt="SQL icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  R
+                </div>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/matlab.png" alt="SQL icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  MATLAB
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/scala1.png" alt="SQL icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  SCALA
+                </div>
+  
+              </li>
+
+              </li>
+
+            </ul>
+            
+            <!--
+              DATA SCIENCE
+            -->
+
+            <h4 class="h4 skill-category">Data Science</h5>
+
+            <ul class="skill-list">
+
+              <li class="skill-item">
+                <div class="skill-icon-box">
+                  <img src="./assets/images/ml.jpeg" alt="PyTorch icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Machine Learning
+                </div>
+              </li>
+
+              <li class="skill-item">
+                <div class="skill-icon-box">
+                  <img src="./assets/images/nlp.png" alt="PyTorch icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  NLP
+                </div>
+              </li>
+
+              <li class="skill-item">
+                <div class="skill-icon-box">
+                <img src="./assets/images/cv.jpg" alt="PyTorch icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Computer Vision
+                </div>
+              </li>
+
+              <li class="skill-item">
+                <div class="skill-icon-box">
+                  <img src="./assets/images/nn.jpg" alt="Hugging Face icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Neural Networks
+                </div>
+              </li>
+              
+              <li class="skill-item">
+                <div class="skill-icon-box">
+                  <img src="./assets/images/statmodel.jpeg" alt="PyTorch icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Statistical Modelling
+                </div>
+              </li>
+
+              <li class="skill-item">
+                <div class="skill-icon-box">
+                  <img src="./assets/images/datavisualization.png" alt="PyTorch icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Data Visualization
+                </div>
+              </li>
+
+            </ul>
+
+            <!-- 
+              Frameworks & Libraries 
+            -->
+
+            <h5 class="h4 skill-category">Frameworks & Libraries</h5>
+
+            <ul class="skill-list">
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/pytorch.png" alt="PyTorch icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  PyTorch
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/tensorflow.png" alt="TensorFlow icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  TensorFlow
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/huggingface.png" alt="Hugging Face icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Hugging Face
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/numpy.png" alt="NumPy icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  NumPy
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/matplotlib.png" alt="Matplotlib icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Matplotlib
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/seaborn.png" alt="SEABORN icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  SEABORN
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/sklearn.jpg" alt="SKLEARN icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  SKLEARN
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/pandas.png" alt="Pandas icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Pandas
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/keras.png" alt="KERAS icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  KERAS
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/opencv.png" alt="OpenCV icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  OpenCV
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/nltk.png" alt="NLTK icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  NLTK
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/openai.png" alt="OpenAI icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  OpenAI(GPT3)
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/llm.png" alt="LLM icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  LLMs
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/bert.jpeg" alt="BERT icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  BERT
+                </div>
+
+              </li>
+              
+                
+            </ul>
+
+            <!--
+              TOOLS & OS
+            -->
+
+            <h5 class="h4 skill-category">Tools & OS</h5>
+
+            <ul class="skill-list">
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/linux.png" alt="Linux icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  linux
+                </div>
+
+              </li>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/tableau.svg" alt="Tableau icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                Tableau
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/powerbi.png" alt="PowerBI icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  PowerBI
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/SAS.png" alt="SAS icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  SAS
+                </div>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/postgressql.png" alt="SQL icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  PostgresSQL
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/docker.png" alt="Docker icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  DOCKER
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/apache_spark.png" alt="PYSPARK icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  PYSPARK
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/apache_hadoop.png" alt="Hadoop icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  HADOOP
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/html.png" alt="HTML icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  HTML
+                </div>
+  
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/css-3.png" alt="CSS icon" width="40">
+                </div>
+  
+                <div class="skill-content-box">
+                  CSS
+                </div>
+  
+              </li>
+
+            </ul>
+
+            <!-- 
+              CLOUD
+            -->
+
+            <h5 class="h4 skill-category">Cloud Services</h5>
+
+            <ul class="skill-list">
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/aws.svg" alt="AWS icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  AWS Services
+                </div>
+
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/awscdk.svg" alt="AWSCDK icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  AWS CDK
+                </div>
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/mysql.png" alt="MySQL icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  MySQL
+                </div>
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/gcp.jpg" alt="GCP icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Google Cloud Platform
+                </div>
+              </li>
+
+              <li class="skill-item">
+
+                <div class="skill-icon-box">
+                  <img src="./assets/images/datawarehousing.jpg" alt="Datawarehousing icon" width="40">
+                </div>
+
+                <div class="skill-content-box">
+                  Data Warehousing
+                </div>
+              </li>
+
+            </ul>
+
+          </section>
+
+          <!-- 
+            Certifications 
+          -->
+
+          <!--
+          <section class="certification">
+            
+            <h3 class="h3 certification-title">Certifications</h3>
+
+              <ul class="certification-list">
+
+                <li class="certification-item">
+                  <a href="https://coursera.org/share/6666b1ed00d2beab8f249b6e1c288f22" target="_blank">
+                    <div class="certification-icon-box">
+                      <img src="./assets/images/deeplearning.png" alt="Deep Learning icon" width="70">
+                    </div>
+
+                    <div class="certification-content-box">
+                      Deep Learning Specialization
+                    </div>
+                  </a>
+                </li>
+
+                <li class="certification-item">
+                  <a href="https://coursera.org/share/008300fb2d29fa4d30011b32b4881192" target="_blank">
+                    <div class="certification-icon-box">
+                      <img src="./assets/images/umich.png" alt="University of Michigan icon" width="70">
+                    </div>
+
+                    <div class="certification-content-box">
+                      Applied Machine Learning
+                    </div>
+                  </a>
+                </li>
+
+                <li class="certification-item">
+                  <a href="https://certificate.algoexpert.io/AE-c3da7de934" target="_blank">
+                    <div class="certification-icon-box">
+                      <img src="./assets/images/algoexpert.png" alt="Algoexpert icon" width="70">
+                    </div>
+
+                    <div class="certification-content-box">
+                      Algoexpert
+                    </div>
+                  </a>
+                </li>
+
+              </ul>
+
+          </section>
+                -->
+
+        </article>
+
+        <!--
+          - #PORTFOLIO
+        -->
+
+        <article class="projects" data-page="projects">
+
+          <header>
+            <h2 class="h2 article-title">Projects</h2>
+          </header>
+
+          <section class="project-posts">
+
+            <ul class="project-posts-list">
+
+              <li class="project-post-item">
+                <a href="https://github.com/JayanthDasamantharao/LanguageDetection" target="_blank">
+
+                  <figure class="project-banner-box">
+                    <!-- img ref: https://i.ytimg.com/vi/01pUL0ex8H8/maxresdefault.jpg -->
+                    <img src="./assets/images/language.png" alt="Language Identification" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+                      <p class="project-category">NLP</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Language Identification</p>
+                      
+                      <span class="dot"></span>
+
+                      <p class="project-category">Embeddings</p>
+                      
+                    </div>
+
+                    <h3 class="h4 project-item-title">Language Identification</h3>
+                      <p class="project-text">
+                        Language Identification is about classifying text 
+                        snippets into different languages.
+                      </p>
+                    
+                      <p class="project-text">
+                        Baseline models include Multinomial Naive Bayes and Logistic Regression.
+                        DistilBERT, enhanced the project's capabilities for advanced language analysis.
+                      </p>
+                    
+                      <p class="project-text">
+                        Employed a blend of traditional and state-of-the-art models for effective classification.
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">Python</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Multinomial Naive Bayes</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">DistilBERT</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+              <li class="project-post-item">
+                <a href="https://github.com/JayanthDasamantharao/Auto-Insurance-Fraud-Detection" target="_blank">
+
+                  <figure class="project-banner-box">
+                    <img src="./assets/images/autoinsurance.png" alt="Auto Insurance Fraud" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+                      <p class="project-category">Topic modeling</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Clustering</p>
+                      
+                      <span class="dot"></span>
+
+                      <p class="project-category">Summarization</p>
+                      
+                    </div>
+
+                    <h3 class="h4 project-item-title">Auto Insurance Fraud Detection</h3>
+                      <p class="project-text">
+                        Developed an ML model for identifying instances of auto insurance fraud. 
+                        
+                      </p>
+                    
+                      <p class="project-text">
+                        Utilized Random Forest, KNN, logistic regression, 
+                        SVM, Decision Trees classifiers. SMOTE, PCA for imbalanced data and dimensionality reduction were utilized.
+                      </p>
+                    
+                      <p class="project-text">
+                        The project offers insights with ML models (AUC, f1 score, recall, etc).
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">Python</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">KNN</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">SVM</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Decision Trees</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Random Forests</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+              <li class="project-post-item">
+                <a href="https://github.com/JayanthDasamantharao/Time-Series-Analysis" target="_blank">
+
+                  <figure class="project-banner-box">
+                    <img src="./assets/images/timeseries.png" alt="SQLite" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+                      <p class="project-category">TimeSeries Analysis</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Python</p>
+                      
+                      <span class="dot"></span>
+
+                      <p class="project-category">Data Modeling</p>
+                      
+                    </div>
+
+                    <h3 class="h4 project-item-title">Time Series Analysis</h3>
+                      <p class="project-text">
+                        Developed a predictive model capable of forecasting weekly sales for Walmart's 45 stores.
+                      </p>
+                    
+                      <p class="project-text">
+                        Employed advanced predictive modeling techniques, including time series analysis (ARIMA) & machine learning algorithms(Random Forests).
+                      </p>
+                    
+                      <p class="project-text">
+                        Manipulated and transformed extensive historical data, to optimize feature engineering for enhanced model performance. 
+                      </p>
+
+                      <p class="project-text">
+                        Implemented hyperparameter tuning and cross-validation strategies to ensure the robustness and generalization ability of the predictive model.
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">ARIMA</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Uni & Multivariate Time Series</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Random Forests</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Matplotlib</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+              <li class="project-post-item">
+                <a href="https://github.com/JayanthDasamantharao/Car-Price-Analysis-Regression-techniques" target="_blank">
+
+                  <figure class="project-banner-box">
+                    <img src="./assets/images/carprice.png" alt="Land Cover Classification" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+                      <p class="project-category">Regression Analysis</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Python</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Data Visualization</p>
+                    </div>
+
+                    <h3 class="h4 project-item-title">Car Price Analysis - Regression techniques</h3>
+                      <p class="project-text">
+                        Predicted the used cars price using Regression techniques.
+                      </p>
+                    
+                      <p class="project-text">
+                        Experimentation with regression models, such as Linear Regression, Logistic Regression is conducted.
+                      </p>
+                    
+                      <p class="project-text">
+                        Data cleaning, data visualization, feature extraction, data preprocessing, model selection, model evaluation were done. 
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">Python</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Pandas</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Numpy</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Matplotlib</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Linear & Logistic Regression</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+              <li class="project-post-item">
+                <a href="#">
+
+                  <figure class="project-banner-box">
+                    <!-- img ref: https://www.kaggle.com/datasets/microize/newyork-yellow-taxi-trip-data-2020-2019 -->
+                    <img src="./assets/images/spamdetection.png" alt="Spam Detection" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+                      <p class="project-category">TensorFlow</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Deep Learning</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Keras</p>
+                    </div>
+
+                    <h3 class="h4 project-item-title"> Spam detection using TensorFlow</h3>
+                      <p class="project-text">
+                        Developed multiple deep learning models using TensorFlow to tackle SMS spam messages. 
+                      </p>
+                    
+                      <p class="project-text">
+                        Tokenization and Embeddings were used for the dataset. Employed recurrent neural networks (RNNs) 
+                        like LSTM and GRU and Universal Sentence Enoder transfer learning model(USE).
+                      </p>
+
+                      <p class="project-text">
+                        Natural Language Processing techniques like Text Vectorization, Tf-Idf Vectorization were employed.
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">Python</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Seaborn</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">TensorFlow</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Matplotlib</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">NLP</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Bidirectional-LSTM</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+              <li class="project-post-item">
+                <a href="https://github.com/JayanthDasamantharao/Twitter-Database">
+
+                  <figure class="project-banner-box">
+                    <img src="./assets/images/twitter.pbm" alt="Twitter Search Engine" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+
+                      <p class="project-category">PostgresSQL</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">MongoDB</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Database Management</p>
+                    </div>
+
+                    <h3 class="h4 project-item-title">Twitter Search Optimization</h3>
+                      <p class="project-text">
+                        Developed a search engine for tweet retrieval, employing a dual-datastore strategy to maximize efficiency.
+                      </p>
+                    
+                      <p class="project-text">
+                        Leveraged MongoDB for tweets and Postgres for user data allowed for an optimal balance between structured and flexible storage.
+                        Integration of dynamic caching, enhanced performance by strategically storing frequently accessed data.
+                      </p>
+                    
+                      <p class="project-text">
+                        A functional search engine, adept at retrieving tweets promptly was the objective.
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">SQL</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">RDBMS</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">NoSQL</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Query Optimization</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+              <li class="project-post-item">
+                <a href="https://github.com/JayanthDasamantharao/Drug-Overdose-Deaths" target="_blank">
+
+                  <figure class="project-banner-box">
+                    <!-- img ref: https://zhoubeiqi.medium.com/named-entity-recognition-ner-using-keras-lstm-spacy-da3ea63d24c5 -->
+                    <img src="./assets/images/drugdeaths.png" alt="Bi-LSTM NER Tagging" loading="lazy">
+                  </figure>
+
+                  <div class="project-content">
+
+                    <div class="project-meta">
+                      <p class="project-category">R programming</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Data Analysis</p>
+
+                      <span class="dot"></span>
+
+                      <p class="project-category">Data Visualization</p>
+                    </div>
+
+                    <h3 class="h4 project-item-title">Analysis of drug-overdose deaths using R</h3>
+                      <p class="project-text">
+                        Focusing on the persistent issue of drug overdose,
+                        this project aims to unveil drivers and trends through meticulous data analysis.
+                      </p>
+                    
+                      <p class="project-text">
+                        The three-pronged approach involves demographics analysis, temporal patterns study, and diagnosing causative factors. 
+                        By delving into attributes like age, gender, and location, I seek to illuminate the dynamics of drug abuse and contribute to informed solutions.
+                      </p>
+                    
+                      <p class="project-text">
+                        Implemented the project as part of my coursework for Data Wrangling with R at Rutgers University.
+                      </p>
+
+                      <div class="project-tech">
+                        <span class="tech">Demographic Analysis</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Temporal Patterns</span>
+                      </div>
+                      <div class="project-tech">
+                        <span class="tech">Geospatial Analysis</span>
+                      </div>
+
+                  </div>
+
+                </a>
+              </li>
+
+            </ul>
+
+          </section>
+
+        </article>
+
+
+        <!--
+          - #RESEARCH
+        -->
+
+        <article class="research" data-page="research">
+          <header>
+            <h2 class="h2 article-title">Research</h2>
+          </header>
+
+          <section class="research-posts">
+
+            <ul class="research-posts-list">
+
+              <li class="research-post-item">
+                <a href="https://journal.ijresm.com/index.php/ijresm/article/view/1723" target="_blank">
+                  <figure class="research-banner-box">
+                    <img src="./assets/images/selfdrivingcars.jpeg" alt="Commonsense reasoning" loading="lazy">
+                  </figure>
+                  <div class="research-content">
+                    <div class="research-meta">
+                      <p class="research-category">International Journal of Engineering Management and Sciences</p>
+                      <span class="dot"></span>
+                      <time datetime="2023-02-03">Feb 03, 2022</time>
+                    </div>
+                    <h5 class="h5 research-item-title">Self Driving Cars Using Image Processing and Deep Learning</h5>
+                    <p class="research-text"> 
+                      Developed an autonomous driving car using YOLO and Faster R-CNN for object detection, ensuring precise identification of vehicles, 
+                      pedestrians, signs, and obstacles. Employed Hough Transform, Convolutional Neural Networks, FCNs, and U-Net for safe lane navigation 
+                      and effective image segmentation. Integrated depth estimation techniques like stereo vision, enhancing the car's perception for accurate 
+                      distance assessments to obstacles.
+                    </p>
+                  </div>
+                </a>
+              </li>
+
+              <li class="research-post-item">
+                <a href="https://github.com/JayanthDasamantharao/Bayesianclassification-Diabetesdata" target="_blank">
+                  <figure class="research-banner-box">
+                    <img src="./assets/images/bayesian.png" alt="InstructABSA" loading="lazy">
+                  </figure>
+                  <div class="research-content">
+                    <div class="research-meta">
+                      <p class="research-category">Rutgers University(Current Work)</p>
+                      <span class="dot"></span>
+                      <time datetime="2023-11-13">January 2024</time>
+                    </div>
+                    <h5 class="h5 research-item-title">Bayesian Classification on Diabetes data</h5>
+                    <p class="research-text">
+                      This project revolves around predicting diabetes outcomes using Bayesian logistic regression, employing PyMC3 in Python for 
+                      comprehensive modeling. The approach involved application of prior distributions, simulation techniques, and the 
+                      estimation of beta coefficients, resulting in accurate predictions. To enhance the project, currently working on
+                      augmenting the dataset for increased model robustness, introducing additional relevant features, refining the Bayesian model 
+                      through the exploration of diverse prior distributions, and potentially incorporating real-time data streams or ensemble methods.
+                    </p>
+                  </div>
+                </a>
+              </li>
+
+              <li class="research-post-item">
+                <a href="" target="_blank">
+                  <figure class="research-banner-box">
+                    <img src="./assets/images/airqualitymonitoring.jpeg" alt="Instruction Learning" loading="lazy">
+                  </figure>
+                  <div class="research-content">
+                    <div class="research-meta">
+                      <p class="research-category">SMART INDIA HACKATHON by MHRD</p>
+                      <span class="dot"></span>
+                      <time datetime="2023-05-17">February 25, 2020</time>
+                    </div>
+                    <h5 class="h5 research-item-title">IOT based Air Quality Monitoring Device</h5>
+                    <p class="research-text">
+                      In my IOT-based Air Quality Monitoring project, I employed an Arduino UNO, integrating an ESP8266 Wi-Fi Module 
+                      for real-time data transmission to the ThingSpeak platform. Using a MQ-135 gas sensor and a 16X2 Character LCD, 
+                      the system ensures efficient air pollution monitoring with cost-effectiveness and compact design. 
+                      The Arduino Sketch manages sensing, ADC conversion, and Wi-Fi communication, showcasing proficiency in 
+                      sensor interfacing and connectivity.
+                    </p>
+                  </div>
+                </a>
+              </li>
+
+              <li class="research-post-item">
+                <a href="https://www.jetir.org/papers/JETIR2311505.pdf" target="_blank">
+                  <figure class="research-banner-box">
+                    <!-- Ref: https://arxiv.org/pdf/2103.12801.pdf -->
+                    <img src="./assets/images/offgridinverter.jpeg" alt="variable_recovery" loading="lazy">
+                  </figure>
+                  <div class="research-content">
+                    <div class="research-meta">
+                      <p class="research-category">Journal of Emerging Technologies and Innovative Research</p>
+                      <span class="dot"></span>
+                      <time datetime="2023-05-10">Nov 30, 2023</time>
+                    </div>
+                    <h5 class="h5 research-item-title">Modelling of an off grid inverter for standalone applications</h5>
+                    <p class="research-text">
+                      This study presents an off-grid inverter designed for standalone single-phase applications, 
+                      utilizing a high-frequency DC-DC step-up converter and a full-bridge PI control voltage source inverter. 
+                      The system generates a 230 V, 50 Hz AC sine wave output from a 48V DC battery source, providing up to 1 kW power.
+                    </p>
+                  </div>
+                </a>
+              </li>
+
+              <!--
+              <li class="research-post-item">
+                <a href="https://arxiv.org/abs/2310.17876" target="_blank">
+                  <figure class="research-banner-box">
+                    <img src="./assets/images/targen.png" alt="TarGEN" loading="lazy">
+                  </figure>
+                  <div class="research-content">
+                    <div class="research-meta">
+                      <p class="research-category">Under review (NAACL)</p>
+                      <span class="dot"></span>
+                      <time datetime="2023-10-30">Oct 30, 2023</time>
+                    </div>
+                    <h5 class="h5 research-item-title">TarGEN: Targeted Data Generation with Large Language Models</h5>
+                    <p class="research-text">
+                      TarGEN, a seedless strategy, generates high-quality synthetic datasets using LLMs, outperforming 
+                      originals by 1-2% in SuperGLUE tasks. With instruction tuning, it achieves 84.54% on synthetic data 
+                      versus 81.49% on originals, maintaining diversity. T5-3B pre-finetuned on TarGEN 
+                      tops the OpenLLM leaderboard by 4.14%, providing an efficient benchmark solution.
+                    </p>
+                  </div>
+                </a>
+              </li>
+              -->
+
+            </ul>
+          </section>
+        </article>
+        
+        <!--
+          - #CONTACT
+        -->
+
+        <article class="contact" data-page="contact">
+
+          <header>
+            <h2 class="h2 article-title">Contact</h2>
+          </header>
+
+          <section class="mapbox" data-mapbox>
+            <figure>
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48550.473839491104!2d-74.48216743763572!3d40.48843496410085!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c3c355f06a92a5%3A0x25925506798e230c!2sNew%20Brunswick%2C%20NJ!5e0!3m2!1sen!2sus!4v1709575917685!5m2!1sen!2sus" 
+                width="600" height="450" 
+                style="border:0;" allowfullscreen="" 
+                loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </figure>
+          </section>
+
+          <section class="contact-form">
+
+            <h3 class="h3 form-title">Contact Form</h3>
+
+            <form action="https://formspree.io/f/mvojypab" method="POST" class="form" target="_blank" data-form>
+
+              <div class="form-group">
+                  <input type="text" name="entry.1325375650" class="form-input" placeholder="Full name" required data-form-input>
+              </div>
+          
+              <div class="form-group">
+                  <input type="email" name="entry.45159176" class="form-input" placeholder="Email address" required data-form-input>
+              </div>
+          
+              <div class="form-group">
+                  <textarea name="entry.2104378170" class="form-input" placeholder="Your Message" required data-form-input></textarea>
+              </div>
+          
+              <div class="form-group">
+                  <button class="form-btn" type="submit" disabled data-form-btn>
+                      <ion-icon name="paper-plane"></ion-icon>
+                      <span>Send Message</span>
+                  </button>
+              </div>
+          
+          </form>
+
+          
+          <!--
+
+          <form action="https://formspree.io/f/mvojypab" method="POST">
+
+            <div class="form-group">
+
+                <input  class="form-control" name="name" placeholder="Name *" required>
+
+            </div>
+
+            <div class="form-group">
+
+                <input class="form-control" name="email" placeholder="Email *" required>
+
+            </div>
+
+            <div class="form-group">
+
+                <textarea class="form-control" name="message" placeholder="Message *" rows="7" required></textarea>
+
+            </div>
+
+            <div class="form-group">
+
+                <button type="submit" class="form-control btn btn-primary" onclick="displayThankYou(event)">Send</button>
+
+            </div>
+        </form>
+        
+        -->
+          
+
+          </section>
+
+        </article>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- scripts -->
+  <script src="assets/js/particles.js"></script>
+  <script src="assets/js/app.js"></script>
+
+  <!--
+    - custom js link
+  -->
+  <script src="./assets/js/script.js"></script>
+
+  <!--
+    - ionicon link
+  -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
 </body>
 </html>
