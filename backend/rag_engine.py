@@ -119,29 +119,164 @@ class ResumeRagEngine:
         stripped = emoji_tail.sub("", t).rstrip()
         return stripped.endswith("?")
 
-    @staticmethod
-    def _ensure_trailing_question(reply: str, intent: str = "general") -> str:
+    def _intent_followup_constraint(self, intent: str, *, skip_meeting_prompt: bool = False) -> str:
+        """Natural-language rules for the follow-up synthesizer (not a fixed question string)."""
+        no_meet = (
+            " Do NOT ask about scheduling calls, meetings, booking time, or setting up a call."
+            if skip_meeting_prompt
+            else ""
+        )
+        mapping = {
+            "information_request": (
+                "Ground the question in what the user asked and what Ada just said. "
+                "Avoid generic closings; vary wording each turn."
+                + no_meet
+            ),
+            "general": "One relevant conversational question continuing this thread." + no_meet,
+            "greeting": (
+                "Invite a natural next step about Jayanth (experience, projects, skills, research). "
+                "Warm and specific; do not repeat identical wording across turns."
+            ),
+            "abusive": (
+                "Politely ask the user to stay respectful and redirect toward Jayanth's profile "
+                "(experience, skills, work)—one short question only."
+            ),
+            "out_of_scope": (
+                "Suggest a sensible next step (e.g. something about Jayanth's profile or how to reach him). "
+                "Stay friendly."
+                + no_meet
+            ),
+            "hiring_role_clarification": (
+                "Ask one sharp clarifying question about the role, seniority, stack, or what 'good fit' means for them."
+            ),
+            "resume_attachment": (
+                "Ask something tied to their resume request or what they are evaluating next (role, stack, focus)."
+            ),
+            "resume_attachment_post_meeting": (
+                "Ask what part of Jayanth's background, skills, or impact to explore next."
+                + no_meet
+                + (" They already have a connect request in this chat." if skip_meeting_prompt else "")
+            ),
+            "resume_focus_clarification": (
+                "Ask which role, seniority, stack, or domain they need the resume optimized for."
+            ),
+            "resume_no_fit_connect": (
+                "Offer one clear next question about fit, role needs, or talking with Jayanth—natural, not checklist-like."
+            ),
+        }
+        return mapping.get(
+            intent,
+            "Ask one short, interrogative follow-up that fits Ada's reply and the user's last message."
+            + no_meet,
+        )
+
+    def _synthesize_followup_question(
+        self,
+        user_message: str,
+        history: List[Dict[str, str]] | None,
+        assistant_reply: str,
+        intent: str,
+        *,
+        skip_meeting_prompt: bool = False,
+    ) -> str:
+        """Ask a lightweight LLM for one closing question tailored to this exchange and intent."""
+        prior = history or []
+        recent: List[str] = []
+        for item in prior[-6:]:
+            role = item.get("role", "")
+            content = (item.get("content") or "").strip()
+            if role in {"user", "assistant"} and content:
+                content = content.replace("\n", " ").strip()
+                if len(content) > 420:
+                    content = content[:417].rstrip() + "..."
+                recent.append(f"{role}: {content}")
+        transcript = "\n".join(recent)[-2000:]
+        body = (assistant_reply or "").strip()
+        body = body.replace("\n", " ").strip()
+        if len(body) > 900:
+            body = body[:897].rstrip() + "..."
+
+        constraint = self._intent_followup_constraint(intent, skip_meeting_prompt=skip_meeting_prompt)
+        system_prompt = (
+            "You write exactly ONE short follow-up question for Ada, Jayanth's portfolio chat assistant. "
+            f"Routing intent (for tone only): {intent}. "
+            f"Constraint: {constraint} "
+            "The question must reflect the user's latest message and Ada's latest reply—never a generic filler. "
+            "Vary phrasing; never reuse the same closing question across different turns unless the user explicitly repeated the same ask. "
+            "No greeting lead-in, no bullet points, no preface. Output only the question, ending with ? Maximum 22 words."
+        )
+        user_block = (
+            f"Latest user message:\n{(user_message or '').strip()}\n\n"
+            f"Ada's latest reply (may end without a question):\n{body or '(empty)'}\n\n"
+            f"Recent transcript:\n{transcript or '(none)'}"
+        )
+        try:
+            completion = self.client.chat.completions.create(
+                model=self.intent_model,
+                temperature=0.55,
+                max_tokens=70,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_block},
+                ],
+            )
+            q = (completion.choices[0].message.content or "").strip()
+            q = q.split("\n")[0].strip().strip("\"'“”")
+            if not q:
+                raise ValueError("empty follow-up")
+            if not q.endswith("?"):
+                q = q.rstrip(".!… ") + "?"
+            return q
+        except Exception:
+            return "What would you like to ask next about Jayanth?"
+
+    def _ensure_trailing_question(
+        self,
+        reply: str,
+        intent: str = "general",
+        *,
+        user_message: str = "",
+        history: List[Dict[str, str]] | None = None,
+        skip_meeting_prompt: bool = False,
+    ) -> str:
         text = (reply or "").strip()
         if not text:
             return text
-        if ResumeRagEngine._reply_has_trailing_question(text):
+        if self._reply_has_trailing_question(text):
             return text
-
-        prompts = {
-            "greeting": "What would you like to know about Jayanth first?",
-            "abusive": "Could we keep it respectful and focus on Jayanth's profile?",
-            "out_of_scope": "Would you like me to help you connect with Jayanth instead?",
-            "hiring_role_clarification": "Which exact role are you hiring for?",
-            "resume_attachment": "Want a one-line pitch tailored to that role next?",
-            "resume_attachment_post_meeting": "What part of his background should we zoom in on next?",
-            "resume_focus_clarification": "Which area should I prioritize for the file I send?",
-            "resume_no_fit_connect": "Would you like me to help you book a quick intro with him?",
-            "information_request": "Would you like a quick example from his recent work too?",
-            "general": "What would you like to explore next?",
-        }
-        follow_up = prompts.get(intent, prompts["general"])
+        follow = self._synthesize_followup_question(
+            user_message,
+            history,
+            text,
+            intent,
+            skip_meeting_prompt=skip_meeting_prompt,
+        )
         suffix = "" if text[-1] in ".!?" else "."
-        return f"{text}{suffix} {follow_up}".strip()
+        return f"{text}{suffix} {follow}".strip()
+
+    def _ensure_information_reply_ends_with_question(
+        self,
+        reply: str,
+        user_message: str,
+        history: List[Dict[str, str]] | None,
+        *,
+        skip_meeting_scheduling_prompt: bool = False,
+    ) -> str:
+        """Prefer model-authored questions; if missing, add one LLM-synthesized follow-up (not a fixed string)."""
+        text = (reply or "").strip()
+        if not text:
+            return text
+        if self._reply_has_trailing_question(text):
+            return text
+        follow = self._synthesize_followup_question(
+            user_message,
+            history,
+            text,
+            "information_request",
+            skip_meeting_prompt=skip_meeting_scheduling_prompt,
+        )
+        suffix = "" if text[-1] in ".!?" else "."
+        return f"{text}{suffix} {follow}".strip()
 
     @staticmethod
     def _ensure_two_paragraphs(reply: str) -> str:
@@ -462,7 +597,13 @@ class ResumeRagEngine:
                         "You can download Jayanth's resume using the link in this chat.\n\n"
                         "You already have a connect request in with Jayanth — tell me which part of his background you want next."
                     )
-                    reply = self._ensure_trailing_question(reply, intent="resume_attachment_post_meeting")
+                    reply = self._ensure_trailing_question(
+                        reply,
+                        intent="resume_attachment_post_meeting",
+                        user_message=message,
+                        history=history,
+                        skip_meeting_prompt=True,
+                    )
                     return self._ensure_two_paragraphs(reply)
                 reply = reply or (
                     "You can download Jayanth's resume using the link in this chat.\n\n"
@@ -470,7 +611,15 @@ class ResumeRagEngine:
                     + self._default_resume_connect_offer_paragraph()
                 )
                 return self._ensure_three_paragraphs(reply)
-            reply = self._ensure_trailing_question(reply, intent=intent)
+            reply = self._ensure_trailing_question(
+                reply,
+                intent=intent,
+                user_message=message,
+                history=history,
+                skip_meeting_prompt=bool(
+                    intent == "out_of_scope" and out_of_scope_skip_schedule_offer
+                ),
+            )
             reply = self._ensure_emoji(reply, intent=intent)
             reply = reply or "I'm Ada, Jayanth's AI assistant ✨ Ask me anything about Jayanth's work and experience."
             return self._ensure_two_paragraphs(reply)
@@ -481,6 +630,8 @@ class ResumeRagEngine:
                     self._ensure_trailing_question(
                         "Let's keep it respectful 🙏 Ask me anything about Jayanth's experience, skills, projects, or research.",
                         intent="abusive",
+                        user_message=message,
+                        history=history,
                     )
                 )
             if intent == "out_of_scope":
@@ -490,12 +641,17 @@ class ResumeRagEngine:
                         "You can reach Jayanth at jayanthdasamantharao@gmail.com or "
                         "https://www.linkedin.com/in/djayanth/.",
                         intent="out_of_scope",
+                        user_message=message,
+                        history=history,
+                        skip_meeting_prompt=out_of_scope_skip_schedule_offer,
                     )
                 )
             return self._ensure_two_paragraphs(
                 self._ensure_trailing_question(
                     "Hey! I'm Ada, Jayanth's AI assistant 👋 Ask me anything about Jayanth's experience, skills, projects, or research.",
                     intent="greeting",
+                    user_message=message,
+                    history=history,
                 )
             )
 
@@ -617,7 +773,9 @@ class ResumeRagEngine:
             temperature=_safe_float(os.getenv("RAG_TEMPERATURE"), 0.2),
         )
         reply = self._finalize_reply(reply)
-        reply = self._ensure_trailing_question(reply, intent=intent)
+        reply = self._ensure_trailing_question(
+            reply, intent=intent, user_message=message, history=history
+        )
         reply = self._ensure_emoji(reply, intent=intent)
         reply = reply or fb
         return self._ensure_two_paragraphs(reply)
@@ -1638,6 +1796,9 @@ class ResumeRagEngine:
             "Always finish with complete sentences; never leave the response cut off. "
             "Use blank lines between paragraphs. "
             "End every response with one natural follow-up question that fits this specific exchange—not a stock question. "
+            "STRICT: The last sentence of your reply must be that question and it must end with ? (not a period). "
+            "Do not trail off with only factual statements; weave the question as the true closing line. "
+            "Never default to the same closing prompt every turn (avoid repeating generic 'want an example' wording unless the user clearly asked for examples). "
             "Do not sound like customer support; avoid corporate filler and generic lines like 'How may I assist you today?'. "
             "If the user appears to be hiring/recruiting (explicitly or implicitly), provide a persuasive, confident pitch that "
             "positions Jayanth as the strongest smart choice for the role using concrete evidence from context. "
@@ -1693,9 +1854,14 @@ class ResumeRagEngine:
         )
         reply = completion.choices[0].message.content or "I do not have enough verified information to answer that."
         reply = self._finalize_reply(reply)
-        reply = self._ensure_emoji(reply, intent="information_request")
-        reply = self._ensure_trailing_question(reply, intent="information_request")
         reply = self._ensure_two_paragraphs(reply)
+        reply = self._ensure_information_reply_ends_with_question(
+            reply,
+            message,
+            history,
+            skip_meeting_scheduling_prompt=skip_meeting_scheduling_prompt,
+        )
+        reply = self._ensure_emoji(reply, intent="information_request")
         if self._looks_like_insufficient_context(reply):
             return {
                 "reply": self.intent_reply(
