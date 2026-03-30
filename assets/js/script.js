@@ -68,7 +68,7 @@ const chatbotInput = document.querySelector("[data-chatbot-input]");
 
 if (chatbotToggle && chatbotPanel && chatbotClose && chatbotMinimize && chatbotMessages && chatbotForm && chatbotInput) {
   const chatHistory = [];
-  const apiEndpoint = "/api/chat";
+  const apiEndpoint = "https://jayanth-portfolio-api.onrender.com/api/chat";
   const chatbotSendButton = chatbotForm.querySelector(".chatbot-send");
   const chatbotSuggestions = chatbotMessages.querySelector("[data-chatbot-suggestions]");
   const chatbotSuggestionButtons = chatbotMessages.querySelectorAll("[data-chatbot-suggestion]");
