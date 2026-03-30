@@ -781,22 +781,39 @@ class MeetingCoordinator:
         avail = (entry.get("reschedule_availability") or "").strip()
         note = (entry.get("reschedule_note") or "").strip()
 
-        avail_plain = f"\nThey suggested: {avail}\n" if avail else ""
+        flex = bool(entry.get("reschedule_flexible_anytime"))
+        if flex:
+            avail_plain = "\nThey indicated they’re flexible — **any time works** for them; Jayanth can propose a slot.\n"
+            avail_display = "Flexible — any time works (requester confirmed in chat)"
+        else:
+            avail_plain = f"\nThey suggested: {avail}\n" if avail else ""
+            avail_display = avail
         note_plain = f"\nNote: {note}\n" if note else ""
-        sub_r = "Reschedule request — Jayanth will propose a new time"
+        sub_r = (
+            "Reschedule — you’re flexible on time; Jayanth will propose a slot"
+            if flex
+            else "Reschedule request — Jayanth will propose a new time"
+        )
         body_r = (
             f"Hi {name},\n\n"
-            "Thanks for your patience — I’ve let Jayanth know you’d like a different time. "
-            "He’ll review your availability and email you a **formal proposed slot** (same process as when you first scheduled). "
-            "The new time is **not** final until you confirm from that email.\n"
-            f"{avail_plain}{note_plain}\n"
-            "You don’t need to do anything else until you hear from him.\n\n"
+            + (
+                "Thanks — I’ve let Jayanth know you’re **flexible on timing** (any time works on your side). "
+                "He’ll email you a **proposed slot** when he can; confirm from that email, same as before.\n"
+                if flex
+                else (
+                    "Thanks for your patience — I’ve let Jayanth know you’d like a different time. "
+                    "He’ll review your availability and email you a **formal proposed slot** (same process as when you first scheduled). "
+                    "The new time is **not** final until you confirm from that email.\n"
+                )
+            )
+            + f"{avail_plain}{note_plain}\n"
+            + "You don’t need to do anything else until you hear from him.\n\n"
             "Warmly,\n"
             "Ada, Jayanth’s AI assistant"
         )
         avail_html = (
-            f"<p style='margin:0 0 12px;'><strong>Availability they shared:</strong> {html.escape(avail)}</p>"
-            if avail
+            f"<p style='margin:0 0 12px;'><strong>Availability they shared:</strong> {html.escape(avail_display)}</p>"
+            if (avail_display or flex)
             else ""
         )
         note_html = (
@@ -819,22 +836,43 @@ class MeetingCoordinator:
         )
         sent_r = self._send_email(sub_r, body_r, req_email, html_r) if req_email else False
 
-        sub_j = f"Reschedule: propose a new time — {name}"
+        sub_j = (
+            f"Reschedule (flexible — any time): {name}"
+            if flex
+            else f"Reschedule: propose a new time — {name}"
+        )
         body_j = (
             f"Hi Jayanth,\n\n"
-            f"{name} asked to reschedule (preference below — not confirmed until you propose and they accept by email).\n"
-            f"Previous time on record: {when or 'see thread'}.\n"
-            f"{avail_plain}{note_plain}\n"
-            f"Open your proposal form to send them a slot to confirm:\n{propose_url}\n\n"
+            + (
+                f"{name} asked to reschedule and said **any time works** / they’re flexible — pick any slot you like and propose it; "
+                f"they’ll confirm by email (same flow as initial booking).\n"
+                if flex
+                else (
+                    f"{name} asked to reschedule (preference below — not confirmed until you propose and they accept by email).\n"
+                )
+            )
+            + f"Previous time on record: {when or 'see thread'}.\n"
+            + f"{avail_plain}{note_plain}\n"
+            + f"Open your proposal form to send them a slot to confirm:\n{propose_url}\n\n"
             "Warmly,\n"
             "Ada, Jayanth’s AI assistant"
         )
         html_j = self._email_shell(
-            title="Reschedule requested",
-            subtitle=f"{name} asked for a different time",
+            title="Reschedule — flexible" if flex else "Reschedule requested",
+            subtitle=(
+                f"{name} — any time works; you propose the slot"
+                if flex
+                else f"{name} asked for a different time"
+            ),
             body_html=(
                 f"<p style='margin:0 0 12px;'><strong>Requester:</strong> {html.escape(name)} — "
                 f"<a href='mailto:{html.escape(req_email)}'>{html.escape(req_email)}</a></p>"
+                + (
+                    "<p style='margin:0 0 12px;padding:12px;background:#ecfdf5;border-radius:8px;border:1px solid #6ee7b7;'>"
+                    "<strong>Flexible scheduling:</strong> they indicated any time works — propose a convenient slot when ready.</p>"
+                    if flex
+                    else ""
+                )
                 + (f"<p style='margin:0 0 8px;'><strong>Earlier time:</strong> {html.escape(str(when))}</p>" if when else "")
                 + avail_html
                 + note_html
@@ -875,6 +913,8 @@ class MeetingCoordinator:
         request_id: str,
         new_availability: Optional[str] = None,
         note: Optional[str] = None,
+        *,
+        flexible_anytime: bool = False,
     ) -> Dict[str, Any]:
         payload = self._load()
         for entry in payload.get("requests", []):
@@ -889,7 +929,16 @@ class MeetingCoordinator:
             entry["status"] = "awaiting_host_proposal"
             entry["reschedule_requested_at"] = datetime.now(timezone.utc).isoformat()
             entry["reschedule_note"] = (note or "").strip() or None
-            entry["reschedule_availability"] = (new_availability or "").strip() or None
+            entry["reschedule_flexible_anytime"] = bool(flexible_anytime)
+            if flexible_anytime:
+                na = (new_availability or "").strip()
+                entry["reschedule_availability"] = (
+                    na
+                    if na
+                    else "Flexible — requester indicated any time works; host may propose any slot."
+                )
+            else:
+                entry["reschedule_availability"] = (new_availability or "").strip() or None
             self._save(payload)
             emails = self._send_reschedule_emails(entry)
             return {"status": "ok", "request": dict(entry), "emails": emails}

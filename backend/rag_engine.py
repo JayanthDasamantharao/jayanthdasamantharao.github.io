@@ -1229,10 +1229,69 @@ class ResumeRagEngine:
             # Fail-safe: ask user for details explicitly.
             return {"name": None, "profession": None, "email": None, "preferred_time": None}
 
+    @staticmethod
+    def message_suggests_meeting_change(message: str) -> bool:
+        """Heuristic: user is trying to change an existing meeting, not start a brand-new connect flow."""
+        t = (message or "").strip().lower()
+        if not t:
+            return False
+        if ResumeRagEngine.availability_looks_flexible_anytime(t):
+            return True
+        patterns = (
+            r"\b(cancel|cancellation|cancelled|canceled|rescind)\b",
+            r"\breschedul(e|ing|ed)?\b",
+            r"\b(call off|call-off)\b",
+            r"\bwithdraw\b",
+            r"\b(can'?t|cannot|won'?t)\s+(make|do)\s+(it|the (call|meeting))\b",
+            r"\bcan'?t\s+make\s+it\b",
+            r"\bneed(s)?\s+(a\s+)?different\s+(time|slot|day)\b",
+            r"\b(another|new)\s+(time|slot|day)\b",
+            r"\bmove\s+(my\s+)?(the\s+)?(meeting|call|slot)\b",
+            r"\bchange\s+(my\s+)?(the\s+)?(meeting|call|time|slot)\b",
+            r"\bskip\s+(the\s+)?(meeting|call)\b",
+            r"\bdrop\s+(the\s+)?(meeting|call)\b",
+            r"\bno\s+longer\s+(available|attending|able)\b",
+            r"\bsomething\s+came\s+up\b",
+            r"\bunschedule\b",
+        )
+        return any(re.search(p, t) for p in patterns)
+
+    @staticmethod
+    def availability_looks_flexible_anytime(text: str) -> bool:
+        """True if the user indicates any time works / full flexibility for scheduling."""
+        t = (text or "").strip().lower()
+        if not t:
+            return False
+        phrases = (
+            "any time works",
+            "anytime works",
+            "any time is fine",
+            "anytime is fine",
+            "whenever works",
+            "flexible on time",
+            "flexible with time",
+            "i'm flexible",
+            "im flexible",
+            "fully flexible",
+            "no preference",
+            "no pref",
+            "whatever works",
+            "whatever time",
+            "you pick",
+            "your pick",
+            "jayanth can pick",
+            "host can pick",
+            "open to any",
+            "open anytime",
+            "any slot",
+            "any window",
+        )
+        return any(p in t for p in phrases)
+
     def extract_meeting_change_action(
         self, message: str, history: Optional[List[Dict[str, str]]] = None
-    ) -> Dict[str, Optional[str]]:
-        """Parse cancel vs reschedule and optional note / availability."""
+    ) -> Dict[str, Any]:
+        """Parse cancel vs reschedule and optional note / availability / flexible-anytime."""
         prior = history or []
         recent_lines = []
         for item in prior[-10:]:
@@ -1247,13 +1306,15 @@ class ResumeRagEngine:
             "The user may want to cancel or reschedule a meeting with Jayanth that was set up through this chat. "
             "Return strict JSON only with keys: "
             "{\"action\": \"cancel\"|\"reschedule\"|\"unclear\", "
-            "\"note\": string|null, \"new_availability\": string|null}. "
+            "\"note\": string|null, \"new_availability\": string|null, \"flexible_anytime\": boolean}. "
             "Rules: "
             "action=cancel if they want to call off, withdraw, cancel, or cannot attend. "
             "action=reschedule if they want a different time, move the meeting, or need another slot (still want to meet). "
             "action=unclear if you cannot tell. "
             "note = short message to pass to Jayanth (apology, reason) when present. "
-            "new_availability = preferred windows or times for reschedule when stated; else null. "
+            "new_availability = preferred windows or times for reschedule when stated; use null if they only say any time works / flexible. "
+            "flexible_anytime=true when they say any time works, they're flexible, whenever, no preference, you pick the time, etc. "
+            "If flexible_anytime=true, new_availability may be null. "
             "Do not invent details."
         )
         try:
@@ -1274,13 +1335,26 @@ class ResumeRagEngine:
                 action = "unclear"
             note = parsed.get("note")
             navail = parsed.get("new_availability")
+            flex = bool(parsed.get("flexible_anytime", False))
+            msg_lower = (message or "").strip().lower()
+            navail_s = str(navail).strip() if navail else ""
+            if not flex:
+                flex = self.availability_looks_flexible_anytime(msg_lower) or self.availability_looks_flexible_anytime(
+                    navail_s
+                )
             return {
                 "action": action,
                 "note": str(note).strip() if note else None,
-                "new_availability": str(navail).strip() if navail else None,
+                "new_availability": navail_s or None,
+                "flexible_anytime": flex,
             }
         except Exception:
-            return {"action": "unclear", "note": None, "new_availability": None}
+            return {
+                "action": "unclear",
+                "note": None,
+                "new_availability": None,
+                "flexible_anytime": self.availability_looks_flexible_anytime(message or ""),
+            }
 
     @staticmethod
     def _looks_like_insufficient_context(reply: str) -> bool:
@@ -1465,17 +1539,17 @@ class ResumeRagEngine:
             "If they only want a summary of experience without asking for a file, use information_request instead. "
             "information_request = asks about Jayanth's profile only (experience, skills, projects, research, education, contact); "
             "hiring/recruiting role-fit questions (e.g., 'I'm hiring for X role, is he a fit?') should be information_request. "
-            "connect_request = asks to connect/talk/schedule with Jayanth, OR asks for information beyond what the bot knows from profile docs "
-            "in a way that implies they want direct interaction with Jayanth (for example: 'I want to know more than what you know about Jayanth', "
-            "'I want to know Jayanth personally', 'can I speak to Jayanth directly', 'how can I connect with him', "
-            "'interesting, tell me more about him' after a profile summary answer); "
+            "meeting_change = cancel, reschedule, move, or withdraw from a meeting/call already scheduled with Jayanth "
+            "(including 'any time works', 'I can't make it', 'need another slot', 'different time'). "
+            "Prefer meeting_change over connect_request whenever cancel/reschedule/different time appears. "
+            "connect_request = NEW request to meet/connect with Jayanth (first-time scheduling intent), NOT changing an existing booking. "
             "connect_confirmation = ONLY when the immediately prior assistant message explicitly offered to schedule a call/meeting "
             "or asked yes/no about connecting for a call (e.g. proposed times, meeting setup). "
             "Short replies like 'yes/sure/ok' after purely informational follow-ups (examples, skills, projects, work detail, "
             "'want more on his experience') MUST be information_request — not connect_confirmation. "
             "Bare 'yes' that continues a profile Q&A thread is information_request unless the prior assistant clearly proposed scheduling. "
-            "meeting_change = user wants to cancel, reschedule, move, or withdraw from a meeting/call they scheduled with Jayanth, "
-            "or add a note about cancellation/changing plans (e.g. 'cancel my call', 'I need a different time', 'sorry I can't make it'); "
+            "Otherwise connect_request = asks to connect/talk/schedule with Jayanth, OR wants direct interaction beyond profile docs "
+            "(e.g. 'how can I connect with him', 'tell me more about him' after a profile answer) when it is NOT meeting_change. "
             "out_of_scope = asks anything not grounded in Jayanth's profile docs, including general knowledge, politics/news, opinions on external events, "
             "or personal/private topics not explicitly in profile context; "
             "abusive = cuss words, hate, harassment, indecent or explicit abusive language. "

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import os
+import re
 import secrets
 import time
 import uuid
@@ -267,6 +268,27 @@ def _reply_linked_existing_meeting(
     )
 
 
+def _extract_email_guess(text: str) -> Optional[str]:
+    m = re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text or "", re.I)
+    return m.group(0).strip().lower() if m else None
+
+
+def _promote_intent_to_meeting_change(session_id: str, message: str, intent: str) -> str:
+    """If an active meeting exists and the user sounds like cancel/reschedule, route to meeting_change (skip connect form)."""
+    if intent == "meeting_change":
+        return intent
+    if not engine.message_suggests_meeting_change(message):
+        return intent
+    entry = meeting_coordinator.find_active_request_for_chat(session_id, None)
+    if not entry:
+        em = _extract_email_guess(message)
+        if em:
+            entry = meeting_coordinator.find_active_request_for_chat(session_id, em)
+    if entry:
+        return "meeting_change"
+    return intent
+
+
 def _complete_connect_after_verification(
     *,
     details: Dict[str, Any],
@@ -377,6 +399,9 @@ def _handle_meeting_change(
     action = str(parsed.get("action") or "unclear").lower()
     note = parsed.get("note")
     new_availability = parsed.get("new_availability")
+    flexible_anytime = bool(parsed.get("flexible_anytime"))
+    if action == "unclear" and flexible_anytime:
+        action = "reschedule"
 
     if action == "unclear":
         fb = (
@@ -426,7 +451,10 @@ def _handle_meeting_change(
         result = meeting_coordinator.cancel_meeting_request(rid, note=note)
     else:
         result = meeting_coordinator.request_reschedule_meeting(
-            rid, new_availability=new_availability, note=note
+            rid,
+            new_availability=new_availability,
+            note=note,
+            flexible_anytime=flexible_anytime,
         )
 
     st = result.get("status")
@@ -501,6 +529,8 @@ def _handle_meeting_change(
     ej = bool(emails.get("host"))
     pref = (new_availability or "").strip()
     note_txt = (note or "").strip()
+    req_row = result.get("request") or entry
+    flex_stored = bool((req_row or {}).get("reschedule_flexible_anytime"))
 
     if action == "cancel":
         facts: Dict[str, Any] = {
@@ -538,18 +568,32 @@ def _handle_meeting_change(
             "email_to_jayanth_sent": ej,
             "jayanth_must_still_propose": True,
             "new_time_not_final_until_email_confirmation": True,
+            "requester_flexible_anytime": flex_stored,
         }
-        fb_ok = (
-            "I’ve **notified Jayanth by email** about your reschedule request"
-            + (f" — you mentioned **{pref}**" if pref else "")
-            + ". He’ll review it and send a **proposed time by email** when he can — same flow as when you first scheduled. "
-            "You’ll confirm from that email; nothing is locked in from this chat alone."
-            if (er or ej)
-            else "I’ve saved your reschedule request, but email didn’t go out just yet (SMTP). "
-            "Please try again shortly or reach Jayanth directly so he can propose a new time."
-        )
-        reply = engine.compose_flow_reply(
-            instruction=(
+        if flex_stored:
+            fb_ok = (
+                "I’ve **notified Jayanth by email** that **any time works** for you — he can pick a slot and will send a **proposed time** by email "
+                "when he can. You don’t need to send more time options here."
+                if (er or ej)
+                else "I’ve saved that you’re flexible on timing, but email didn’t go out just yet (SMTP). Please try again shortly."
+            )
+            instr = (
+                "The requester said any time works / is flexible on scheduling. Jayanth was emailed to propose a slot when ready — same email-confirm flow as first booking. "
+                "Do NOT ask them to list more time windows or preferred slots in chat. "
+                "Confirm you’ve notified Jayanth; keep it warm and short (2 short paragraphs). "
+                "If email flags are true, mention the emails went out."
+            )
+        else:
+            fb_ok = (
+                "I’ve **notified Jayanth by email** about your reschedule request"
+                + (f" — you mentioned **{pref}**" if pref else "")
+                + ". He’ll review it and send a **proposed time by email** when he can — same flow as when you first scheduled. "
+                "You’ll confirm from that email; nothing is locked in from this chat alone."
+                if (er or ej)
+                else "I’ve saved your reschedule request, but email didn’t go out just yet (SMTP). "
+                "Please try again shortly or reach Jayanth directly so he can propose a new time."
+            )
+            instr = (
                 "STRICT — reschedule request (two-way process, same as initial scheduling): "
                 "The user’s preferred time is ONLY a request. Jayanth has been emailed to review and will send a formal **proposal** by email. "
                 "The meeting is NOT yet rescheduled to that time until they confirm via the email thread (Yes / alternatives), like the first booking. "
@@ -558,7 +602,9 @@ def _handle_meeting_change(
                 "Do not invent that the new time is confirmed. "
                 "If email_to_jayanth_sent is true, say Jayanth was notified. If email_to_requester_sent is true, mention a short confirmation was emailed to them too. "
                 "Tone: professional, warm, concise, 2 short paragraphs max."
-            ),
+            )
+        reply = engine.compose_flow_reply(
+            instruction=instr,
             message=payload.message,
             history=payload.history,
             facts=facts,
@@ -901,6 +947,7 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
             payload.message, payload.history
         ):
             intent = "resume_request"
+        intent = _promote_intent_to_meeting_change(session_id, payload.message, intent)
         raw_confidence = routing.get("confidence")
         intent_confidence = float(raw_confidence) if isinstance(raw_confidence, (int, float)) else None
         if chat_store:
