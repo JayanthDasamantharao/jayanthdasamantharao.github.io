@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #1c2440, #0c111a 60%);
+      color: #eef1f8;
+    }
+    .card {
+      width: min(420px, calc(100vw - 32px));
+      background: #141a25;
+      border: 1px solid #2d3650;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    p {
+      margin: 0 0 16px;
+      color: #aeb8d5;
+      font-size: 14px;
+    }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: #c6d0ea;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #394360;
+      border-radius: 8px;
+      background: #0f1522;
+      color: #eef1f8;
+      padding: 10px 11px;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 14px;
+      width: 100%;
+      border: 1px solid #4c6fff;
+      border-radius: 8px;
+      background: #1d2d88;
+      color: #e3e9ff;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    button:hover { background: #263bb2; }
+    .status {
+      margin-top: 12px;
+      min-height: 18px;
+      color: #f1a9a9;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Admin Login</h1>
+    <p>Sign in to view chat sessions and messages.</p>
+    <form id="login-form">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+
+      <button id="login-btn" type="submit">Sign In</button>
+    </form>
+    <div id="status" class="status"></div>
+  </main>
+
+  <script>
+    const loginForm = document.getElementById("login-form");
+    const statusEl = document.getElementById("status");
+    const loginBtn = document.getElementById("login-btn");
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(loginForm);
+      const payload = {
+        username: String(formData.get("username") || "").trim(),
+        password: String(formData.get("password") || ""),
+      };
+
+      statusEl.textContent = "";
+      loginBtn.disabled = true;
+
+      try {
+        const response = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "Login failed.");
+        }
+        window.location.href = "/admin/chats";
+      } catch (error) {
+        statusEl.textContent = String(error.message || "Unable to log in.");
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

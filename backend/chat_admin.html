@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat Logs - Admin</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111318;
+      color: #eef1f8;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 24px;
+    }
+
+    .tz-note {
+      margin: -8px 0 16px;
+      font-size: 13px;
+      color: #8b95b2;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid #4c6fff;
+      color: #dbe4ff;
+      background: #1d2d88;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: #263bb2;
+    }
+
+    .status {
+      color: #aab4cf;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr 1.5fr;
+      }
+    }
+
+    .card {
+      background: #171b22;
+      border: 1px solid #2a3040;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid #2a3040;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 70vh;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #252b3a;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #1c2230;
+      color: #d8def2;
+    }
+
+    tr:hover td {
+      background: #202738;
+    }
+
+    .session-row {
+      cursor: pointer;
+    }
+
+    .selected-row td {
+      background: #253252;
+    }
+
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      border: 1px solid #3f4b69;
+      color: #d7def3;
+      white-space: nowrap;
+    }
+
+    .empty {
+      padding: 14px;
+      color: #9ea8c5;
+      font-size: 14px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      word-break: break-all;
+    }
+
+    .db-card {
+      margin-bottom: 16px;
+      padding: 14px;
+    }
+
+    .db-form {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      align-items: end;
+    }
+
+    .db-field label {
+      display: block;
+      font-size: 12px;
+      color: #b6c0dc;
+      margin-bottom: 6px;
+    }
+
+    .db-field input,
+    .db-field select {
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #36415e;
+      background: #101723;
+      color: #eef1f8;
+      padding: 8px 10px;
+    }
+
+    .db-result {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #aab4cf;
+    }
+
+    .db-tables {
+      margin-top: 10px;
+      max-height: 180px;
+      overflow: auto;
+      border: 1px solid #2a3040;
+      border-radius: 8px;
+    }
+
+    .db-tables table {
+      font-size: 13px;
+    }
+
+    .danger-btn {
+      border-color: #7f2a37;
+      background: #4a1f2a;
+      color: #ffdbe2;
+    }
+
+    .danger-btn:hover {
+      background: #602735;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Chat Logs</h1>
+    <p class="tz-note">Timestamps below use <strong>US Eastern</strong> (<code>America/New_York</code>) — EST or EDT depending on the date. Stored values are UTC.</p>
+    <div class="controls">
+      <button id="refresh-btn" type="button">Refresh Sessions</button>
+      <button id="logout-btn" type="button" class="danger-btn">Logout</button>
+      <span class="status" id="status">Loading...</span>
+    </div>
+
+    <section class="card db-card">
+      <div class="card-header">Postgres Connection Tester</div>
+      <form id="db-test-form" class="db-form">
+        <div class="db-field">
+          <label for="db-host">Host</label>
+          <input id="db-host" name="host" type="text" value="localhost" required />
+        </div>
+        <div class="db-field">
+          <label for="db-port">Port</label>
+          <input id="db-port" name="port" type="number" value="5432" required />
+        </div>
+        <div class="db-field">
+          <label for="db-name">Database</label>
+          <input id="db-name" name="database" type="text" value="portfolio_chat" required />
+        </div>
+        <div class="db-field">
+          <label for="db-user">Username</label>
+          <input id="db-user" name="username" type="text" required />
+        </div>
+        <div class="db-field">
+          <label for="db-pass">Password</label>
+          <input id="db-pass" name="password" type="password" required />
+        </div>
+        <div class="db-field">
+          <label for="db-sslmode">SSL Mode</label>
+          <select id="db-sslmode" name="sslmode">
+            <option value="disable" selected>disable</option>
+            <option value="prefer">prefer</option>
+            <option value="require">require</option>
+          </select>
+        </div>
+        <div class="db-field">
+          <button id="db-test-btn" type="submit">Test Connection</button>
+        </div>
+      </form>
+      <div class="db-result" id="db-result">Enter credentials and click "Test Connection".</div>
+      <div class="db-tables" id="db-tables" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th>Schema</th>
+              <th>Table</th>
+            </tr>
+          </thead>
+          <tbody id="db-tables-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-header">Sessions</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Primary Intent</th>
+                <th>Intent Confidence</th>
+                <th>Created (US Eastern)</th>
+                <th>Updated (US Eastern)</th>
+              </tr>
+            </thead>
+            <tbody id="sessions-body"></tbody>
+          </table>
+          <div class="empty" id="sessions-empty" hidden>No sessions found yet.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">Messages (<span id="selected-session">None selected</span>)</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time (US Eastern)</th>
+                <th>Role</th>
+                <th>Intent</th>
+                <th>Message</th>
+                <th>Flags</th>
+              </tr>
+            </thead>
+            <tbody id="messages-body"></tbody>
+          </table>
+          <div class="empty" id="messages-empty">Select a session to view messages.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const sessionsBody = document.getElementById("sessions-body");
+    const sessionsEmpty = document.getElementById("sessions-empty");
+    const messagesBody = document.getElementById("messages-body");
+    const messagesEmpty = document.getElementById("messages-empty");
+    const selectedSessionEl = document.getElementById("selected-session");
+    const refreshBtn = document.getElementById("refresh-btn");
+    const dbTestForm = document.getElementById("db-test-form");
+    const dbResult = document.getElementById("db-result");
+    const dbTables = document.getElementById("db-tables");
+    const dbTablesBody = document.getElementById("db-tables-body");
+    const dbTestBtn = document.getElementById("db-test-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    let currentSessionId = "";
+
+    const toText = (value) => (value == null ? "" : String(value));
+    const formatConfidence = (value) => {
+      if (value == null || Number.isNaN(Number(value))) return "-";
+      return `${Math.round(Number(value) * 100)}%`;
+    };
+
+    /** DB stores UTC; display in US Eastern (America/New_York → EST/EDT). */
+    const formatIso = (iso) => {
+      if (!iso) return "";
+      let s = String(iso).trim();
+      // ISO without Z/offset is parsed as *local* in JS — force UTC for server timestamps.
+      if (/^\d{4}-\d{2}-\d{2}T\d/.test(s) && !/[Zz]$/.test(s) && !/[+-]\d{2}:?\d{2}$/.test(s)) {
+        s += "Z";
+      }
+      const d = new Date(s);
+      if (Number.isNaN(d.getTime())) return iso;
+      // Do not mix dateStyle/timeStyle with timeZoneName — that throws "Invalid option" in many browsers.
+      return d.toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short",
+      });
+    };
+
+    const setStatus = (text) => {
+      statusEl.textContent = text;
+    };
+
+    const clearMessages = (message) => {
+      messagesBody.innerHTML = "";
+      messagesEmpty.hidden = false;
+      messagesEmpty.textContent = message;
+      selectedSessionEl.textContent = "None selected";
+      currentSessionId = "";
+    };
+
+    const renderMessages = (sessionId, messages) => {
+      messagesBody.innerHTML = "";
+      selectedSessionEl.textContent = sessionId;
+
+      if (!messages || messages.length === 0) {
+        messagesEmpty.hidden = false;
+        messagesEmpty.textContent = "No messages in this session yet.";
+        return;
+      }
+
+      messagesEmpty.hidden = true;
+      for (const item of messages) {
+        const row = document.createElement("tr");
+        const flags = [];
+        if (item.is_fallback) flags.push("fallback");
+        if (item.is_abusive_blocked) flags.push("abusive_blocked");
+        row.innerHTML = `
+          <td>${toText(formatIso(item.created_at))}</td>
+          <td><span class="pill">${toText(item.role)}</span></td>
+          <td><span class="pill">${toText(item.intent || "-")}</span></td>
+          <td class="mono">${toText(item.message_text)}</td>
+          <td>${flags.length ? flags.join(", ") : "-"}</td>
+        `;
+        messagesBody.appendChild(row);
+      }
+    };
+
+    const fetchSessionMessages = async (sessionId) => {
+      setStatus(`Loading messages for ${sessionId}...`);
+      try {
+        const response = await fetch(`/api/chats/${encodeURIComponent(sessionId)}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load messages (${response.status})`);
+        }
+        const data = await response.json();
+        renderMessages(sessionId, data.messages || []);
+        setStatus(`Loaded ${data.messages?.length || 0} messages`);
+      } catch (error) {
+        clearMessages("Unable to load session messages.");
+        setStatus(error.message || "Failed to load messages");
+      }
+    };
+
+    const renderSessions = (sessions) => {
+      sessionsBody.innerHTML = "";
+      if (!sessions || sessions.length === 0) {
+        sessionsEmpty.hidden = false;
+        clearMessages("No sessions to display yet.");
+        return;
+      }
+
+      sessionsEmpty.hidden = true;
+      for (const session of sessions) {
+        const row = document.createElement("tr");
+        row.className = "session-row";
+        if (session.session_id === currentSessionId) {
+          row.classList.add("selected-row");
+        }
+        row.innerHTML = `
+          <td class="mono">${toText(session.session_id)}</td>
+          <td><span class="pill">${toText(session.primary_intent || "unknown")}</span></td>
+          <td><span class="pill">${formatConfidence(session.primary_intent_confidence)}</span></td>
+          <td>${toText(formatIso(session.created_at))}</td>
+          <td>${toText(formatIso(session.updated_at))}</td>
+        `;
+        row.addEventListener("click", async () => {
+          currentSessionId = session.session_id;
+          renderSessions(sessions);
+          await fetchSessionMessages(session.session_id);
+        });
+        sessionsBody.appendChild(row);
+      }
+    };
+
+    const fetchSessions = async () => {
+      setStatus("Loading sessions...");
+      try {
+        const response = await fetch("/api/chats/sessions?limit=200");
+        if (!response.ok) {
+          throw new Error(`Failed to load sessions (${response.status})`);
+        }
+        const data = await response.json();
+        const sessions = data.sessions || [];
+        renderSessions(sessions);
+        setStatus(`Loaded ${sessions.length} session(s)`);
+      } catch (error) {
+        sessionsBody.innerHTML = "";
+        sessionsEmpty.hidden = false;
+        sessionsEmpty.textContent = "Unable to load sessions.";
+        clearMessages("Messages unavailable.");
+        setStatus(error.message || "Failed to load sessions");
+      }
+    };
+
+    const renderDbTables = (tables) => {
+      dbTablesBody.innerHTML = "";
+      if (!tables || tables.length === 0) {
+        dbTables.hidden = true;
+        return;
+      }
+      dbTables.hidden = false;
+      for (const row of tables) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${toText(row.schema)}</td>
+          <td class="mono">${toText(row.name)}</td>
+        `;
+        dbTablesBody.appendChild(tr);
+      }
+    };
+
+    dbTestForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(dbTestForm);
+      const payload = {
+        host: toText(formData.get("host")).trim(),
+        port: Number(formData.get("port")),
+        database: toText(formData.get("database")).trim(),
+        username: toText(formData.get("username")).trim(),
+        password: toText(formData.get("password")),
+        sslmode: toText(formData.get("sslmode")).trim() || "disable",
+      };
+
+      dbTestBtn.disabled = true;
+      dbResult.textContent = "Testing connection...";
+      dbTables.hidden = true;
+
+      try {
+        const response = await fetch("/api/admin/postgres/test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(toText(data.detail) || `Failed with status ${response.status}`);
+        }
+        dbResult.textContent =
+          `Connected successfully as ${toText(data.current_user)} to ${toText(data.current_database)}. ` +
+          `Found ${Array.isArray(data.tables) ? data.tables.length : 0} table(s).`;
+        renderDbTables(data.tables || []);
+      } catch (error) {
+        dbResult.textContent = toText(error.message || "Postgres connection failed.");
+        renderDbTables([]);
+      } finally {
+        dbTestBtn.disabled = false;
+      }
+    });
+
+    refreshBtn.addEventListener("click", fetchSessions);
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await fetch("/api/admin/logout", { method: "POST" });
+      } catch (error) {
+        // ignore and still redirect to login
+      }
+      window.location.href = "/admin/login";
+    });
+    fetchSessions();
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+.DS_Store
+**/.DS_Store
+
+# Editor/OS noise
+.vscode/
+.idea/
+Thumbs.db
+
+# Local resume workspace
+Resume/
+
+# Python/backend artifacts
+.venv/
+backend/.venv/
+backend/.env
+backend/data/
+__pycache__/
+*.pyc

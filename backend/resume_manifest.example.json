@@ -1,0 +1,13 @@
+{
+  "default_path": "Resume/ExampleRole/resume.pdf",
+  "entries": [
+    {
+      "path": "Resume/ExampleRole/resume.pdf",
+      "tags": ["MLE", "machine learning engineer", "recommendation", "Python"]
+    },
+    {
+      "path": "Resume/AnotherVariant/resume.pdf",
+      "tags": ["AI engineer", "LLM", "RAG", "GenAI", "LangChain"]
+    }
+  ]
+}
