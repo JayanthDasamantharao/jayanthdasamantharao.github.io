@@ -181,18 +181,47 @@ if (chatbotToggle && chatbotPanel && chatbotClose && chatbotMinimize && chatbotM
 
   const addMessageTyped = async function (message, sender, attachment) {
     const node = createMessageBubble(sender);
-    const tokens = String(message).split(/(\s+)/).filter(Boolean);
-    for (let i = 0; i < tokens.length; i++) {
-      node.content.textContent += tokens[i];
+    const full = String(message);
+    if (sender !== "bot") {
+      node.content.textContent = full;
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-      const token = tokens[i];
-      const delay = /[.!?]\s*$/.test(token) ? 55 : 24;
-      await sleep(delay);
+      return node.bubble;
     }
-    if (sender === "bot") {
-      node.content.innerHTML = formatRichText(message);
+
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      node.content.innerHTML = formatRichText(full);
+      if (attachment) {
+        appendResumeAttachment(node.bubble, attachment);
+      }
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      return node.bubble;
     }
-    if (sender === "bot" && attachment) {
+
+    // Reveal in multi-character steps (not word-by-word) and throttle scroll updates
+    // so the pane does not jitter on every token.
+    const charStep = 18;
+    const tickMs = 32;
+    const scrollEveryMs = 110;
+    let lastScrollAt = 0;
+
+    node.content.classList.add("chatbot-reply-streaming");
+
+    for (let pos = 0; pos < full.length; ) {
+      pos = Math.min(full.length, pos + charStep);
+      node.content.textContent = full.slice(0, pos);
+      const now = Date.now();
+      if (now - lastScrollAt >= scrollEveryMs) {
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        lastScrollAt = now;
+      }
+      if (pos < full.length) {
+        await sleep(tickMs);
+      }
+    }
+
+    node.content.classList.remove("chatbot-reply-streaming");
+    node.content.innerHTML = formatRichText(full);
+    if (attachment) {
       appendResumeAttachment(node.bubble, attachment);
     }
     chatbotMessages.scrollTop = chatbotMessages.scrollHeight;

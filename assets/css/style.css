@@ -1793,6 +1793,13 @@ textarea.form-input::-webkit-resizer { display: none; }
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Steady line box while plain-text streaming (before rich HTML replaces it). */
+.chatbot-reply-streaming {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .chatbot-suggestions {
   display: flex;
   flex-wrap: wrap;

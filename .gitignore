@@ -6,9 +6,6 @@
 .idea/
 Thumbs.db
 
-# Local resume workspace
-Resume/
-
 # Python/backend artifacts
 .venv/
 backend/.venv/

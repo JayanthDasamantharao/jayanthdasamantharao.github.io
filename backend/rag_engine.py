@@ -1368,10 +1368,31 @@ class ResumeRagEngine:
         for chunk in self.index_data.get("chunks", []):
             sim = self._cosine_similarity(query_vec, chunk["embedding"])
             bonus = 0.0
+            meta = chunk.get("metadata") or {}
+            doc_type = (meta.get("doc_type") or "").lower()
             if is_current_experience_query:
+                # Prefer CV/resume PDFs over academic research for "current role" questions.
+                if doc_type == "resume":
+                    bonus += 0.14
+                elif doc_type == "research":
+                    bonus -= 0.18
                 text = chunk["text"].lower()
-                if any(token in text for token in ("present", "current", "currently", "aug 2024", "fedway")):
-                    bonus = 0.08
+                if any(
+                    token in text
+                    for token in (
+                        "present",
+                        "current",
+                        "currently",
+                        "aug 2024",
+                        "fedway",
+                        "eliteus",
+                        "elite us",
+                        "piscataway",
+                        "ai engineer",
+                        "applied ai",
+                    )
+                ):
+                    bonus += 0.08
             scored.append({**chunk, "score": sim + bonus})
         scored.sort(key=lambda item: item["score"], reverse=True)
         return scored[: self.top_k]
