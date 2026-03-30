@@ -123,7 +123,8 @@ Set these in `backend/.env`:
 - `SMTP_FROM_EMAIL`
 - `SMTP_USE_TLS`
 - `JAYANTH_NOTIFY_EMAIL`
-- `PUBLIC_BASE_URL` (used to build approval link)
+- `API_PUBLIC_URL` — public **FastAPI** base URL (e.g. `https://your-service.onrender.com`). Used for `/api/meeting/...` links in emails. **Required** if `PUBLIC_BASE_URL` is GitHub Pages (Pages cannot serve `/api/`).
+- `PUBLIC_BASE_URL` — fallback for those links if `API_PUBLIC_URL` is unset (local dev: `http://localhost:8000`)
 - `DEFAULT_GMEET_LINK` (optional static meet link to include in final confirmation)
 - `EMAIL_CHECK_DELIVERABILITY` (default `true` — verify domain can receive mail before accepting an address)
 

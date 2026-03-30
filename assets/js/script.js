@@ -69,6 +69,19 @@ const chatbotInput = document.querySelector("[data-chatbot-input]");
 if (chatbotToggle && chatbotPanel && chatbotClose && chatbotMinimize && chatbotMessages && chatbotForm && chatbotInput) {
   const chatHistory = [];
   const apiEndpoint = "https://jayanth-portfolio-api.onrender.com/api/chat";
+
+  /** Resolve relative /api/... paths against the API host (chat on GitHub Pages cannot fetch same-origin /api). */
+  const resolveApiUrl = function (pathOrUrl) {
+    if (!pathOrUrl) return pathOrUrl;
+    if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+    try {
+      const base = new URL(apiEndpoint);
+      const path = pathOrUrl.startsWith("/") ? pathOrUrl : "/" + pathOrUrl;
+      return base.origin + path;
+    } catch (e) {
+      return pathOrUrl;
+    }
+  };
   const chatbotSendButton = chatbotForm.querySelector(".chatbot-send");
   const chatbotSuggestions = chatbotMessages.querySelector("[data-chatbot-suggestions]");
   const chatbotSuggestionButtons = chatbotMessages.querySelectorAll("[data-chatbot-suggestion]");
@@ -168,7 +181,7 @@ if (chatbotToggle && chatbotPanel && chatbotClose && chatbotMinimize && chatbotM
     wrap.className = "chatbot-attachment";
     const a = document.createElement("a");
     a.className = "chatbot-attachment-link";
-    a.href = attachment.download_url;
+    a.href = resolveApiUrl(attachment.download_url);
     a.textContent = attachment.label || "Download resume";
     if (attachment.filename) {
       a.setAttribute("download", attachment.filename);

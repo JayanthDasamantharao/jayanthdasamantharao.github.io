@@ -23,7 +23,7 @@ from .email_verification import (
     extract_six_digit_code,
     looks_like_resend_request,
 )
-from .meeting_coordinator import MeetingCoordinator, ensure_est_in_slot_text
+from .meeting_coordinator import MeetingCoordinator, _api_public_base, ensure_est_in_slot_text
 from .rag_engine import ResumeRagEngine
 
 
@@ -1154,8 +1154,9 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
             if selected_path.suffix.lower() == ".docx" and dl_name.lower().endswith(".pdf"):
                 dl_name = "resume_jayanthd.docx"
             token = _issue_resume_download_token(selected_path)
+            base = _api_public_base()
             attachment = {
-                "download_url": f"/api/resume/download/{token}",
+                "download_url": f"{base}/api/resume/download/{token}",
                 "filename": dl_name,
                 "label": "Download resume",
             }

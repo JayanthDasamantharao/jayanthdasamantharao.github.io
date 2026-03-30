@@ -31,6 +31,19 @@ def ensure_est_in_slot_text(text: str) -> str:
     return f"{t} EST"
 
 
+def _api_public_base() -> str:
+    """Host where FastAPI is reachable (used in email links for /api/meeting/...).
+
+    If you use GitHub Pages for the portfolio but Render for the API, set
+    API_PUBLIC_URL to the Render URL. PUBLIC_BASE_URL alone is often the Pages
+    site, which cannot serve /api/ routes (links would 404).
+    """
+    explicit = os.getenv("API_PUBLIC_URL", "").strip().rstrip("/")
+    if explicit:
+        return explicit
+    return os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").strip().rstrip("/")
+
+
 @dataclass
 class MeetingRequest:
     request_id: str
@@ -376,7 +389,7 @@ class MeetingCoordinator:
 
     def notify_jayanth_for_slot_selection(self, request: MeetingRequest) -> bool:
         notify_email = os.getenv("JAYANTH_NOTIFY_EMAIL", "jayanthdasamantharao@gmail.com").strip()
-        base_url = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").strip().rstrip("/")
+        base_url = _api_public_base()
         propose_url = f"{base_url}/api/meeting/propose/{request.token}"
         subject = f"Meeting Request: {request.name} ({request.profession})"
         body = (
@@ -440,7 +453,7 @@ class MeetingCoordinator:
         if st not in ("pending", "awaiting_host_proposal", "reschedule_requested"):
             return {"status": "invalid_state", "reason": f"Cannot propose in status={st!r}"}
 
-        base_url = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").strip().rstrip("/")
+        base_url = _api_public_base()
         # New token each proposal so old Yes/Need-another-slot links from prior emails are invalidated.
         response_token = secrets.token_urlsafe(24)
         accept_url = f"{base_url}/api/meeting/respond/{response_token}?decision=accept"
@@ -506,7 +519,7 @@ class MeetingCoordinator:
 
     def _notify_jayanth_counter(self, entry: Dict[str, Any]) -> bool:
         notify_email = os.getenv("JAYANTH_NOTIFY_EMAIL", "jayanthdasamantharao@gmail.com").strip()
-        base_url = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").strip().rstrip("/")
+        base_url = _api_public_base()
         token = entry.get("token") or ""
         propose_url = f"{base_url}/api/meeting/propose/{token}"
         name = entry.get("name", "Requester")
@@ -761,7 +774,7 @@ class MeetingCoordinator:
         name = entry.get("name") or "there"
         req_email = (entry.get("email") or "").strip()
         notify_email = self._notify_email_default()
-        base_url = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").strip().rstrip("/")
+        base_url = _api_public_base()
         token = entry.get("token") or ""
         propose_url = f"{base_url}/api/meeting/propose/{token}"
         when = entry.get("proposed_time") or entry.get("preferred_time") or ""
