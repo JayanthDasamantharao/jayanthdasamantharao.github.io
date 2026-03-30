@@ -891,6 +891,10 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
             profile_check = engine.is_profile_related(payload.message, payload.history)
             if profile_check.get("profile_related"):
                 intent = "information_request"
+        if intent in {"connect_request", "connect_confirmation"} and engine.should_treat_as_information_followup(
+            payload.message, payload.history
+        ):
+            intent = "information_request"
         if intent == "information_request" and engine.should_continue_resume_file_flow(
             payload.message, payload.history
         ):

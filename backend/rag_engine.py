@@ -1053,9 +1053,151 @@ class ResumeRagEngine:
         )
         return any(marker in text for marker in markers)
 
+    @staticmethod
+    def _last_assistant_content(history: List[Dict[str, str]] | None) -> str:
+        if not history:
+            return ""
+        for item in reversed(history):
+            if item.get("role") == "assistant":
+                return (item.get("content") or "").strip()
+        return ""
+
+    def _is_short_affirmation(self, message: str) -> bool:
+        raw = (message or "").strip().lower()
+        if not raw or len(raw) > 48:
+            return False
+        normalized = re.sub(r"[\s,;:'\"]+", " ", raw)
+        normalized = re.sub(r"^[.!?]+|[.!?]+$", "", normalized).strip()
+        normalized = re.sub(r"\s+", " ", normalized)
+        if not normalized:
+            return False
+        allow = {
+            "yes",
+            "yeah",
+            "yep",
+            "yup",
+            "sure",
+            "ok",
+            "okay",
+            "please",
+            "pls",
+            "absolutely",
+            "definitely",
+            "indeed",
+            "of",
+            "course",
+            "sounds",
+            "good",
+            "go",
+            "ahead",
+            "do",
+            "tell",
+            "me",
+            "more",
+            "kinda",
+            "kind",
+            "right",
+        }
+        phrases = {
+            "yes please",
+            "yes pls",
+            "sounds good",
+            "go ahead",
+            "please do",
+            "of course",
+            "sure thing",
+            "ok sure",
+            "okay sure",
+            "yes sure",
+            "tell me more",
+        }
+        if normalized in phrases:
+            return True
+        words = normalized.split()
+        if words and all(w in allow for w in words):
+            return True
+        return False
+
+    def _last_substantive_user_question(self, history: List[Dict[str, str]] | None) -> str:
+        if not history:
+            return ""
+        for item in reversed(history):
+            if item.get("role") != "user":
+                continue
+            content = (item.get("content") or "").strip()
+            if not content or self._is_short_affirmation(content):
+                continue
+            return content
+        return ""
+
+    def _assistant_offered_scheduling_or_connect(self, assistant_text: str) -> bool:
+        t = (assistant_text or "").lower()
+        if not t:
+            return False
+        markers = (
+            "schedule",
+            "scheduling",
+            "quick call",
+            "set up a call",
+            "set up a meeting",
+            "book a",
+            "meeting with",
+            "call with jayanth",
+            "connect you with jayanth",
+            "connect you to jayanth",
+            "time slot",
+            "time works best",
+            "arrange a",
+            "would you like me to schedule",
+            "help you connect",
+            "help schedule",
+            "loop jayanth",
+            "set up a quick",
+        )
+        return any(m in t for m in markers)
+
+    def should_treat_as_information_followup(
+        self, message: str, history: List[Dict[str, str]] | None = None
+    ) -> bool:
+        """Route short affirmations back to RAG when the bot did not offer scheduling/contact for a call."""
+        if not self._is_short_affirmation(message):
+            return False
+        last_a = self._last_assistant_content(history)
+        if not last_a:
+            return False
+        if self._assistant_offered_scheduling_or_connect(last_a):
+            return False
+        return True
+
+    def _retrieval_query(self, message: str, history: List[Dict[str, str]] | None) -> str:
+        m = (message or "").strip()
+        if not m:
+            return m
+        if self._is_short_affirmation(m) and history:
+            parts: List[str] = [m]
+            prev_u = self._last_substantive_user_question(history)
+            if prev_u:
+                p = prev_u.replace("\n", " ").strip()
+                parts.append(f"Earlier user question: {p[:280]}")
+            la = self._last_assistant_content(history)
+            if la:
+                snippet = la.replace("\n", " ").strip()
+                if len(snippet) > 320:
+                    snippet = snippet[:317] + "..."
+                parts.append(f"Prior assistant: {snippet}")
+            return "\n".join(parts)
+        return m
+
+    def _history_for_classifier(self, message: str, history: List[Dict[str, str]] | None) -> List[Dict[str, str]]:
+        prior = list(history or [])
+        msg = (message or "").strip()
+        if prior and prior[-1].get("role") == "user" and (prior[-1].get("content") or "").strip() == msg:
+            return prior[:-1]
+        return prior
+
     def classify_intent(self, message: str, history: List[Dict[str, str]] | None = None) -> Dict[str, Any]:
         """LLM-based intent classifier for routing chat behavior."""
-        prior = history or []
+        prior = self._history_for_classifier(message, history)
         recent_lines = []
         for item in prior[-8:]:
             role = item.get("role", "").strip()
@@ -1084,7 +1226,11 @@ class ResumeRagEngine:
             "in a way that implies they want direct interaction with Jayanth (for example: 'I want to know more than what you know about Jayanth', "
             "'I want to know Jayanth personally', 'can I speak to Jayanth directly', 'how can I connect with him', "
             "'interesting, tell me more about him' after a profile summary answer); "
-            "connect_confirmation = short confirmation like 'yes/sure/please do' after prior assistant asked about scheduling; "
+            "connect_confirmation = ONLY when the immediately prior assistant message explicitly offered to schedule a call/meeting "
+            "or asked yes/no about connecting for a call (e.g. proposed times, meeting setup). "
+            "Short replies like 'yes/sure/ok' after purely informational follow-ups (examples, skills, projects, work detail, "
+            "'want more on his experience') MUST be information_request — not connect_confirmation. "
+            "Bare 'yes' that continues a profile Q&A thread is information_request unless the prior assistant clearly proposed scheduling. "
             "meeting_change = user wants to cancel, reschedule, move, or withdraw from a meeting/call they scheduled with Jayanth, "
             "or add a note about cancellation/changing plans (e.g. 'cancel my call', 'I need a different time', 'sorry I can't make it'); "
             "out_of_scope = asks anything not grounded in Jayanth's profile docs, including general knowledge, politics/news, opinions on external events, "
@@ -1126,7 +1272,7 @@ class ResumeRagEngine:
 
     def is_profile_related(self, message: str, history: List[Dict[str, str]] | None = None) -> Dict[str, Any]:
         """LLM check: is user asking about Jayanth profile/expertise context?"""
-        prior = history or []
+        prior = self._history_for_classifier(message, history)
         recent_lines = []
         for item in prior[-8:]:
             role = item.get("role", "").strip()
@@ -1435,7 +1581,8 @@ class ResumeRagEngine:
         if not self.is_ready:
             raise RuntimeError("Index is empty. Run /api/reindex first.")
 
-        retrieved = self._retrieve(message)
+        retrieve_query = self._retrieval_query(message, history)
+        retrieved = self._retrieve(retrieve_query)
         if not retrieved:
             return {
                 "reply": self.intent_reply(
