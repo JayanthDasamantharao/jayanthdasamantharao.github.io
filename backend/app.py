@@ -268,6 +268,114 @@ def _reply_linked_existing_meeting(
     )
 
 
+def _looks_like_chat_credential_request(message: str) -> bool:
+    """User appears to be asking this chatbot for secrets (API keys, etc.)."""
+    low = (message or "").lower()
+    if not low.strip():
+        return False
+    compact = re.sub(r"\s+", "", low)
+    if "apikey" in compact:
+        return True
+    if "api key" in low or "api-key" in low:
+        if any(
+            w in low
+            for w in (
+                "you",
+                "your",
+                "ada",
+                "bot",
+                "assistant",
+                "this chat",
+                "chatbot",
+                "portfolio",
+            )
+        ):
+            return True
+    if "openai" in low and "key" in low:
+        return True
+    if "bearer" in low and "token" in low and any(w in low for w in ("you", "your", "ada", "give", "share")):
+        return True
+    return False
+
+
+def _looks_like_bot_implementation_question(message: str) -> bool:
+    """User asks how this portfolio chatbot / Ada is engineered (not Jayanth's résumé tech in general)."""
+    low = (message or "").lower()
+    if not low.strip():
+        return False
+
+    def mentions_bot() -> bool:
+        if re.search(r"\bada\b", low):
+            return True
+        return any(
+            p in low
+            for p in (
+                "this bot",
+                "this chatbot",
+                "this chat",
+                "chatbot",
+                "portfolio assistant",
+                "this assistant",
+                "this site",
+                "the assistant",
+            )
+        )
+
+    if re.search(r"\bhow\s+(is|was|are|were)\s+(you|ada)\s+(built|made|implemented)\b", low):
+        return True
+    if re.search(
+        r"\bhow\s+(is|was|are)\s+(this|the)\s+(bot|chatbot|assistant)\s+(built|made|implemented|designed)\b",
+        low,
+    ):
+        return True
+    if "under the hood" in low and any(w in low for w in ("you", "ada", "this bot", "this chat", "chatbot")):
+        return True
+    if (
+        any(p in low for p in ("technical architecture", "implementation details"))
+        and mentions_bot()
+    ):
+        return True
+    if any(p in low for p in ("what stack", "which stack", "your stack", "tech stack", "backend stack")):
+        if "your stack" in low:
+            return True
+        if mentions_bot():
+            return True
+        if re.search(r"\bwhat stack\b.*\b(you|your)\b|\b(you|your)\b.*\bwhat stack\b", low):
+            return True
+    if any(w in low for w in ("vector db", "vector database", "vectordb", "pinecone", "chroma", "chromadb", "weaviate")):
+        if mentions_bot():
+            return True
+        if re.search(
+            r"\b(you|your)\b.{0,80}\b(vector|pinecone|chroma|weaviate|vectordb|chromadb)\b|"
+            r"\b(vector|pinecone|chroma|weaviate|vectordb|chromadb)\b.{0,80}\b(you|your)\b",
+            low,
+        ):
+            return True
+    if "embedding" in low and any(w in low for w in ("this chat", "chatbot", "your retrieval")):
+        return True
+    if "embedding" in low and re.search(r"\bada\b", low):
+        return True
+    if re.search(r"\brag\b", low):
+        if any(
+            phrase in low
+            for phrase in (
+                "this bot",
+                "this chat",
+                "chatbot",
+                "this assistant",
+                "portfolio assistant",
+                "your rag",
+                "you use rag",
+                "using rag",
+                "use rag",
+            )
+        ):
+            return True
+        if re.search(r"\brag\b.{0,40}\bada\b|\bada\b.{0,40}\brag\b", low):
+            return True
+    return False
+
+
 def _extract_email_guess(text: str) -> Optional[str]:
     m = re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text or "", re.I)
     return m.group(0).strip().lower() if m else None
@@ -1466,6 +1574,59 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
             return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
 
         # Default profile flow: always attempt RAG for information and possible out_of_scope.
+        if _looks_like_chat_credential_request(payload.message):
+            fb = (
+                "I'm Ada, Jayanth's assistant here — I can't share API keys, tokens, or any secrets; those stay locked on his server "
+                "and never belong in chat. I'm happy to keep geeking out about how Jayanth builds with LLMs and RAG though — what do you want to dig into? 😊"
+            )
+            reply = engine.compose_flow_reply(
+                instruction=(
+                    "You are Ada, Jayanth's portfolio assistant. First person. Politely refuse to share credentials; "
+                    "say keys never appear in chat. Offer to continue about Jayanth's work. Warm, brief, 2 short paragraphs, end with a question."
+                ),
+                message=payload.message,
+                history=payload.history,
+                facts={"refusal": "credentials"},
+                fallback_reply=fb,
+            )
+            if chat_store:
+                chat_store.log_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_text=reply,
+                    intent=intent,
+                    intent_confidence=intent_confidence,
+                    sources=[],
+                )
+            return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
+
+        if _looks_like_bot_implementation_question(payload.message):
+            fb = (
+                "I'm Ada — Jayanth keeps the technical details of this assistant private, so I can't walk through how it was put together. "
+                "I *can* geek out about his experience and projects, though; what would you like to hear about first? ✨"
+            )
+            reply = engine.compose_flow_reply(
+                instruction=(
+                    "You are Ada, Jayanth's portfolio assistant. First person. Politely refuse to describe this chatbot's "
+                    "architecture, stack, or implementation (no models, RAG, vector DBs, or hosting). Say that's not something "
+                    "you share here. Warm, brief, 2 short paragraphs, end with a question about Jayanth's work or background."
+                ),
+                message=payload.message,
+                history=payload.history,
+                facts={"refusal": "bot_implementation"},
+                fallback_reply=fb,
+            )
+            if chat_store:
+                chat_store.log_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_text=reply,
+                    intent=intent,
+                    intent_confidence=intent_confidence,
+                    sources=[],
+                )
+            return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
+
         meeting_done = engine.thread_has_completed_meeting_request(payload.history)
         result = engine.chat(
             payload.message,
