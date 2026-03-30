@@ -1193,15 +1193,16 @@ class ResumeRagEngine:
             selected_resumes = all_resumes[: max(1, limit)]
         docs.extend(selected_resumes)
 
-        research_docs: List[Path] = []
+        # Root-level PDFs/DOCX/etc. (resume, CV, research paper). Previously only filenames
+        # containing "paper" were indexed, so production missed e.g. jayanth__resume.pdf while
+        # still picking up Research_paper.pdf — skewing "current role" answers toward old research.
+        root_docs: List[Path] = []
         for p in self.repo_root.iterdir():
             if not p.is_file() or p.suffix.lower() not in SUPPORTED_EXTENSIONS:
                 continue
-            lowered = p.name.lower()
-            if "paper" in lowered:
-                research_docs.append(p)
+            root_docs.append(p)
 
-        docs.extend(sorted(research_docs, key=lambda path: path.stat().st_mtime, reverse=True))
+        docs.extend(sorted(root_docs, key=lambda path: path.stat().st_mtime, reverse=True))
 
         # Deduplicate while keeping stable order
         unique_docs: List[Path] = []
