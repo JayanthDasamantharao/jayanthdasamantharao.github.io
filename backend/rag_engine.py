@@ -1363,6 +1363,16 @@ class ResumeRagEngine:
         is_current_experience_query = any(
             token in query_lower for token in ("current", "currently", "work experience", "working on", "present role")
         )
+        is_experience_overview_query = any(
+            token in query_lower
+            for token in (
+                "work experience",
+                "experience",
+                "professional experience",
+                "career",
+                "background",
+            )
+        )
         query_vec = self.client.embeddings.create(model=self.embed_model, input=[query]).data[0].embedding
         scored = []
         for chunk in self.index_data.get("chunks", []):
@@ -1393,9 +1403,25 @@ class ResumeRagEngine:
                     )
                 ):
                     bonus += 0.08
+            if is_experience_overview_query:
+                text = chunk["text"].lower()
+                if any(
+                    token in text
+                    for token in (
+                        "eliteus",
+                        "fedway",
+                        "harvest software",
+                        "accenture",
+                        "research assistant",
+                        "self driving",
+                        "andhra university",
+                    )
+                ):
+                    bonus += 0.12
             scored.append({**chunk, "score": sim + bonus})
         scored.sort(key=lambda item: item["score"], reverse=True)
-        return scored[: self.top_k]
+        top_n = self.top_k + 3 if is_experience_overview_query else self.top_k
+        return scored[: top_n]
 
     def chat(
         self,
@@ -1438,6 +1464,10 @@ class ResumeRagEngine:
             sources.append(src)
             context_blocks.append(f"[Source: {src}]\n{item['text']}")
         context_text = "\n\n---\n\n".join(context_blocks)
+        is_experience_overview_query = any(
+            token in (message or "").lower()
+            for token in ("work experience", "professional experience", "career", "background")
+        )
 
         system_prompt = (
             "You are Ada, Jayanth's AI assistant. Speak about Jayanth in third person. "
@@ -1467,6 +1497,17 @@ class ResumeRagEngine:
             "If hiring/recruiting is implied but the role is not explicitly provided, ask a clarifying role question first before giving the pitch. "
             "For hiring-fit answers, prefer this structure: short impact opener paragraph, one proof paragraph, then one final question line."
         )
+        if is_experience_overview_query:
+            system_prompt += (
+                " STRICT FORMAT FOR EXPERIENCE OVERVIEW: produce exactly 8 concise lines in this order: "
+                "lines 1-3 about current Fedway/EliteUS work (technical and quantified), "
+                "lines 4-5 about Harvest (quantified impact), "
+                "lines 6-7 about Accenture (quantified impact), "
+                "line 8 about research assistant/research paper work (quantified where available). "
+                "After those 8 lines, add one final line that starts exactly with 'Key skills:' and list skills drawn from experience context only. "
+                "Use concrete numbers/percentages/counts/ranges whenever context provides them. "
+                "Do not invent exact metrics not present in context; if a metric is implied but not explicit, use a cautious range phrase."
+            )
         if skip_meeting_scheduling_prompt:
             system_prompt += (
                 " STRICT: The user already submitted a connect or meeting request earlier in this conversation. "
