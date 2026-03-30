@@ -895,6 +895,8 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
             payload.message, payload.history
         ):
             intent = "information_request"
+        if intent == "resume_request" and engine.is_general_profile_question_not_resume_file(payload.message):
+            intent = "information_request"
         if intent == "information_request" and engine.should_continue_resume_file_flow(
             payload.message, payload.history
         ):

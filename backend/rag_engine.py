@@ -201,6 +201,11 @@ class ResumeRagEngine:
             "You write exactly ONE short follow-up question for Ada, Jayanth's portfolio chat assistant. "
             f"Routing intent (for tone only): {intent}. "
             f"Constraint: {constraint} "
+            "The question is spoken BY Ada TO the visitor: Ada has the context; the visitor is learning about Jayanth. "
+            "NEVER ask the visitor to provide, supply, explain, or recount Jayanth's jobs, metrics, or achievements "
+            "(reject patterns like 'Can you provide more details about Jayanth…', 'Could you tell me about his role at…' where the burden is on the visitor). "
+            "USE invitations for Ada to continue: e.g. 'Want me to go deeper on his Harvest internship?', "
+            "'Should I break down how he approached that analysis?', 'What aspect should I expand on next—tools, scale, or outcomes?'. "
             "The question must reflect the user's latest message and Ada's latest reply—never a generic filler. "
             "Vary phrasing; never reuse the same closing question across different turns unless the user explicitly repeated the same ask. "
             "No greeting lead-in, no bullet points, no preface. Output only the question, ending with ? Maximum 22 words."
@@ -226,6 +231,15 @@ class ResumeRagEngine:
                 raise ValueError("empty follow-up")
             if not q.endswith("?"):
                 q = q.rstrip(".!… ") + "?"
+            low = q.lower()
+            if re.search(r"\b(can|could)\s+you\s+(provide|share|give|spell|tell)\b", low) and (
+                "jayanth" in low
+                or "his role" in low
+                or "intern" in low
+                or "work at" in low
+                or "achievement" in low
+            ):
+                q = "Want me to go a layer deeper on that part of his experience?"
             return q
         except Exception:
             return "What would you like to ask next about Jayanth?"
@@ -253,6 +267,43 @@ class ResumeRagEngine:
         )
         suffix = "" if text[-1] in ".!?" else "."
         return f"{text}{suffix} {follow}".strip()
+
+    @staticmethod
+    def _repoint_inverted_profile_closing_question(reply: str) -> str:
+        """If the closing asks the visitor to supply Jayanth's facts, flip it to an Ada-led offer."""
+        t = (reply or "").strip()
+        if not t or "?" not in t:
+            return t
+
+        def _is_bad_closing(closing: str) -> bool:
+            low = closing.lower()
+            if not re.search(r"\b(can|could)\s+you\s+(provide|share|give|spell|tell)\b", low):
+                return False
+            return bool(
+                re.search(
+                    r"jayanth|his role|his work|internship|intern at|achievement|achievements at|experience at",
+                    low,
+                )
+            )
+
+        parts = t.rsplit("\n\n", 1)
+        if len(parts) == 2:
+            body, closing = parts[0].strip(), parts[1].strip()
+            if _is_bad_closing(closing):
+                return f"{body}\n\nWant me to unpack that part of his background a bit more?".strip()
+
+        qpos = t.rfind("?")
+        before = t[:qpos]
+        for sep in ("\n\n", ". ", "! "):
+            idx = before.rfind(sep)
+            if idx != -1:
+                closing = t[idx + len(sep) : qpos + 1].strip()
+                if _is_bad_closing(closing):
+                    prefix = t[: idx + len(sep)].rstrip()
+                    return f"{prefix} Want me to go a layer deeper on that stretch of his work?".strip()
+        if _is_bad_closing(t):
+            return "Want me to unpack that part of his background a bit more?"
+        return t
 
     def _ensure_information_reply_ends_with_question(
         self,
@@ -876,6 +927,42 @@ class ResumeRagEngine:
         except Exception:
             return {"needs_clarification": True, "confidence": 0.0}
 
+    def is_general_profile_question_not_resume_file(self, message: str) -> bool:
+        """True when the user is asking for profile/explanation content, not to obtain a résumé file."""
+        msg = (message or "").strip().lower()
+        if not msg:
+            return False
+        resume_lex = ("resume", "cv", "pdf", "download", "curriculum", "attachment")
+        if any(w in msg for w in resume_lex):
+            return False
+        pivot_phrases = (
+            "work experience",
+            "experience",
+            "explain",
+            "tell me about",
+            "what did he",
+            "what does he",
+            "describe",
+            "background",
+            "career",
+            "projects",
+            "research",
+            "skill",
+            "currently",
+            "where does he",
+            "his work",
+            "his job",
+            "his role",
+            "his role at",
+            "day to day",
+            "what is he",
+            "what he's",
+            "elaborate",
+            "more about him",
+            "about his",
+        )
+        return any(p in msg for p in pivot_phrases)
+
     def should_continue_resume_file_flow(
         self, message: str, history: List[Dict[str, str]] | None = None
     ) -> bool:
@@ -883,33 +970,31 @@ class ResumeRagEngine:
         prior = history or []
         if len(prior) < 2:
             return False
+        if self.is_general_profile_question_not_resume_file(message):
+            return False
+
         last_bot = ""
         for item in reversed(prior):
             if item.get("role") == "assistant":
                 last_bot = str(item.get("content", "")).lower()
                 break
-        resume_markers = (
-            "resume",
-            "cv",
-            "download",
-            "pdf",
-            "diversified",
-            "machine learning",
-            "computer vision",
-            "software development",
-            "what are you looking",
-            "which area",
-            "role",
-            "stack",
-        )
-        if not any(m in last_bot for m in resume_markers):
+        # Last turn must actually be about delivering or scoping a résumé/CV (not generic ML/experience copy).
+        if not (
+            re.search(r"\b(resume|curriculum)\b", last_bot)
+            or re.search(r"\bcv\b", last_bot)
+            or "download" in last_bot
+            or "link in this chat" in last_bot
+        ):
             return False
 
         system_prompt = (
             "Return strict JSON: {\"continue_resume\": boolean}. "
-            "continue_resume=true if the user is replying in the same thread about which resume file "
-            "or what role/domain they care about (including short answers like 'MLE', 'AI engineer', 'the CV for vision roles'). "
-            "continue_resume=false for unrelated small talk or other topics."
+            "The previous assistant message was about Jayanth's resume/CV file (download, link, or which resume variant to send). "
+            "continue_resume=true ONLY if the user's latest message still belongs to THAT thread: "
+            "clarifying which résumé file, role label for the CV, format, resending the link, or a short tag like MLE/AI engineer/CV for X. "
+            "continue_resume=false if the user moved on to general questions about Jayanth's work history, experience, projects, skills, "
+            "current job, day-to-day responsibilities, research, or anything they want explained in chat (not about obtaining the file). "
+            "continue_resume=false for small talk unrelated to the file. When unsure, prefer false."
         )
         try:
             completion = self.client.chat.completions.create(
@@ -926,7 +1011,7 @@ class ResumeRagEngine:
             parsed = json.loads(raw)
             return bool(parsed.get("continue_resume", False))
         except Exception:
-            return True
+            return False
 
     def verify_resume_entry_matches_need(
         self,
@@ -1797,6 +1882,11 @@ class ResumeRagEngine:
             "Use blank lines between paragraphs. "
             "End every response with one natural follow-up question that fits this specific exchange—not a stock question. "
             "STRICT: The last sentence of your reply must be that question and it must end with ? (not a period). "
+            "STRICT: The closing question is FROM Ada TO the visitor. Ada holds Jayanth's profile—you are not interviewing the visitor for facts. "
+            "Never ask the visitor to supply, provide, explain, or spell out Jayanth's roles, achievements, or résumé details "
+            "(e.g. forbid: 'Can you provide more details about Jayanth's role at…?', 'Could you tell/share more about his work at…?'). "
+            "Instead invite what they want to hear next from Ada, e.g. 'Want me to unpack his Harvest analytics work a bit more?', "
+            "'Curious how that scaled in production?', 'Should we zoom in on his stack or team impact there?'. "
             "Do not trail off with only factual statements; weave the question as the true closing line. "
             "Never default to the same closing prompt every turn (avoid repeating generic 'want an example' wording unless the user clearly asked for examples). "
             "Do not sound like customer support; avoid corporate filler and generic lines like 'How may I assist you today?'. "
@@ -1861,6 +1951,7 @@ class ResumeRagEngine:
             history,
             skip_meeting_scheduling_prompt=skip_meeting_scheduling_prompt,
         )
+        reply = self._repoint_inverted_profile_closing_question(reply)
         reply = self._ensure_emoji(reply, intent="information_request")
         if self._looks_like_insufficient_context(reply):
             return {
