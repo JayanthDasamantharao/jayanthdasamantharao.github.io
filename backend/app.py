@@ -173,13 +173,14 @@ def _reply_linked_existing_meeting(
     *,
     context: str = "email_verify",
     base_reply: Optional[str] = None,
+    send_relink_emails: bool = True,
 ) -> str:
     """
     Chat reply when the same email already has an active meeting: session re-linked, no duplicate request.
     context: email_verify | connect_direct | resume_no_fit
     """
-    jayanth_sent = meeting_coordinator.notify_jayanth_session_relinked(entry, details)
-    requester_sent = meeting_coordinator.send_requester_relink_ack(entry, details)
+    jayanth_sent = meeting_coordinator.notify_jayanth_session_relinked(entry, details) if send_relink_emails else False
+    requester_sent = meeting_coordinator.send_requester_relink_ack(entry, details) if send_relink_emails else False
 
     status = (entry.get("status") or "").strip()
     proposed = (entry.get("proposed_time") or "").strip()
@@ -1364,15 +1365,42 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
         if intent in {"connect_request", "connect_confirmation"}:
             # LLM-driven detail extraction (no keyword/regex routing for this step).
             details = engine.extract_connect_details(payload.message, payload.history)
+            raw_email = (details.get("email") or "").strip()
+            if not raw_email:
+                fb = (
+                    "Absolutely — share the email you used (or want to use) for scheduling, "
+                    "and I'll check whether there's already a meeting on file before asking anything else. 📩"
+                )
+                reply = engine.compose_flow_reply(
+                    instruction=(
+                        "Email-first connect flow. Ask only for their email so you can check existing meeting records first. "
+                        "Do not ask for name/profession/time in this turn."
+                    ),
+                    message=payload.message,
+                    history=payload.history,
+                    facts={"connect_email_first": True},
+                    fallback_reply=fb,
+                )
+                if chat_store:
+                    chat_store.log_message(
+                        session_id=session_id,
+                        role="assistant",
+                        message_text=reply,
+                        intent=intent,
+                        intent_confidence=intent_confidence,
+                        sources=[],
+                    )
+                return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
+
             email_err, details = _validate_and_normalize_connect_email(details)
             if email_err:
                 fb = (
                     f"{email_err}\n\n"
-                    "When you have a valid address, I can send the confirmation and loop Jayanth in for a time slot."
+                    "Share a valid email and I'll check your meeting status right away."
                 )
                 reply = engine.compose_flow_reply(
                     instruction=(
-                        "Explain we need a working email to schedule with Jayanth. "
+                        "Explain we need a valid email for meeting lookup. "
                         "Use validation_issue for the exact problem; do not contradict it."
                     ),
                     message=payload.message,
@@ -1390,50 +1418,63 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
                         sources=[],
                     )
                 return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
+
+            known = meeting_coordinator.find_latest_by_email(details["email"] or "")
+            if known:
+                rid = str(known.get("request_id") or "").strip()
+                entry = (
+                    meeting_coordinator.attach_chat_session_to_entry(rid, session_id) if rid else None
+                ) or known
+                status = str(entry.get("status") or "").strip().lower()
+                if status in {"pending", "awaiting_host_proposal", "proposed", "confirmed", "reschedule_requested"}:
+                    reply = _reply_linked_existing_meeting(
+                        entry,
+                        details,
+                        payload.message,
+                        payload.history,
+                        context="connect_direct",
+                        send_relink_emails=False,
+                    )
+                else:
+                    when = ensure_est_in_slot_text(
+                        (
+                            (entry.get("proposed_time") or "").strip()
+                            or (entry.get("preferred_time") or "").strip()
+                            or "the previous time on file"
+                        )
+                    )
+                    fb = (
+                        f"I found your earlier meeting record for **{details['email']}** — it is currently **{status or 'closed'}**"
+                        f" (last time on file: **{when}**). "
+                        "If you'd like, I can set up a new request and only collect anything that's missing. ✨"
+                    )
+                    reply = engine.compose_flow_reply(
+                        instruction=(
+                            "Email lookup found a non-active meeting status (usually cancelled/closed). "
+                            "State the status and last on-file time, then offer to start a new request without asking all details again."
+                        ),
+                        message=payload.message,
+                        history=payload.history,
+                        facts={
+                            "lookup_email": details["email"],
+                            "meeting_status": status or "closed",
+                            "last_time_on_file": when,
+                        },
+                        fallback_reply=fb,
+                    )
+                if chat_store:
+                    chat_store.log_message(
+                        session_id=session_id,
+                        role="assistant",
+                        message_text=reply,
+                        intent=intent,
+                        intent_confidence=intent_confidence,
+                        sources=[],
+                    )
+                return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
+
             missing = meeting_coordinator.missing_fields(details)
             if missing:
-                # First step: confirm scheduling intent in a friendly way.
-                if len(missing) == 4 and intent == "connect_request":
-                    if engine.thread_has_completed_meeting_request(payload.history):
-                        fb = (
-                            "You already have a connect request with Jayanth from this chat — he's on it! 🙌 "
-                            "Want me to add a note or tweak anything?"
-                        )
-                        reply = engine.compose_flow_reply(
-                            instruction=(
-                                "They already submitted a connect/meeting request in this thread. "
-                                "Acknowledge warmly; do NOT ask if they want to schedule a new call. "
-                                "Offer to add a note or tweak details."
-                            ),
-                            message=payload.message,
-                            history=payload.history,
-                            facts={"stage": "connect_already_submitted"},
-                            fallback_reply=fb,
-                        )
-                    else:
-                        fb = (
-                            "Sure — I can help set up a meeting with Jayanth. "
-                            "Would you like me to schedule a quick call? 😊"
-                        )
-                        reply = engine.compose_flow_reply(
-                            instruction=(
-                                "They want to connect with Jayanth. Ask warmly if they'd like you to schedule a quick call."
-                            ),
-                            message=payload.message,
-                            history=payload.history,
-                            facts={"stage": "connect_scheduling_prompt"},
-                            fallback_reply=fb,
-                        )
-                    if chat_store:
-                        chat_store.log_message(
-                            session_id=session_id,
-                            role="assistant",
-                            message_text=reply,
-                            intent=intent,
-                            intent_confidence=intent_confidence,
-                            sources=[],
-                        )
-                    return {"reply": reply, "sources": [], "session_id": session_id, "intent": intent}
                 name = (details.get("name") or "").strip()
                 needs = _format_missing_fields(missing)
                 if name:

@@ -216,6 +216,17 @@ class MeetingCoordinator:
                 return dict(entry)
         return None
 
+    def find_latest_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        """Most recent meeting row for this requester email (any status, including cancelled)."""
+        em = (email or "").strip().lower()
+        if not em:
+            return None
+        payload = self._load()
+        for entry in reversed(payload.get("requests") or []):
+            if (entry.get("email") or "").strip().lower() == em:
+                return dict(entry)
+        return None
+
     def attach_chat_session_to_entry(self, request_id: str, chat_session_id: str) -> Optional[Dict[str, Any]]:
         """Link a new browser/chat session to an existing meeting (after re-verifying the same email)."""
         if not request_id or not chat_session_id:
