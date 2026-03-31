@@ -1707,8 +1707,42 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
 
 @app.get("/api/meeting/approve/{token}")
 def approve_meeting(token: str) -> Dict[str, Any]:
-    # Backward-compatible route: redirect to proposal form.
-    return RedirectResponse(url=f"/api/meeting/propose/{token}", status_code=status.HTTP_302_FOUND)
+    # Backward-compatible host shortcut: accept call immediately from host email.
+    return RedirectResponse(url=f"/api/meeting/host-accept/{token}", status_code=status.HTTP_302_FOUND)
+
+
+@app.get("/api/meeting/host-accept/{token}")
+def host_accept_meeting(token: str) -> HTMLResponse:
+    try:
+        result = meeting_coordinator.host_accept_call(token)
+        state = result.get("status")
+        if state == "not_found":
+            raise HTTPException(status_code=404, detail="Meeting request not found.")
+        if state == "invalid_state":
+            reason = html.escape(str(result.get("reason") or "Invalid state"))
+            return HTMLResponse(
+                content=(
+                    "<html><body style='padding:24px;font-family:Arial;'>"
+                    "<h2>Cannot accept this call</h2>"
+                    f"<p>{reason}</p>"
+                    "</body></html>"
+                ),
+                status_code=400,
+            )
+        if state in {"already_confirmed", "confirmed"}:
+            return HTMLResponse(
+                content=(
+                    "<html><body style='padding:24px;font-family:Arial;background:#0f1522;color:#eef1f8;'>"
+                    "<h2>Call confirmed ✅</h2>"
+                    "<p>Confirmation with Google Meet details was sent to both sides.</p>"
+                    "</body></html>"
+                )
+            )
+        return HTMLResponse("<h2>Request processed.</h2>")
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - runtime safety
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.get("/api/meeting/propose/{token}")

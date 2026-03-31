@@ -402,13 +402,16 @@ class MeetingCoordinator:
         notify_email = os.getenv("JAYANTH_NOTIFY_EMAIL", "jayanthdasamantharao@gmail.com").strip()
         base_url = _api_public_base()
         propose_url = f"{base_url}/api/meeting/propose/{request.token}"
+        accept_url = f"{base_url}/api/meeting/host-accept/{request.token}"
         subject = f"Meeting Request: {request.name} ({request.profession})"
         body = (
             f"{request.name} ({request.profession}) wants to connect with you.\n\n"
             f"Requester email: {request.email}\n"
             f"Preferred time: {request.preferred_time}\n\n"
-            "Propose times in US Eastern (EST/ET) — Jayanth's timezone (NJ).\n"
-            "Choose a proposed slot and send it to requester here:\n"
+            "Actions:\n"
+            "1) Accept call now (uses the requester's preferred time and instantly sends Meet confirmation to both sides):\n"
+            f"{accept_url}\n"
+            "2) Propose a different slot in US Eastern (EST/ET):\n"
             f"{propose_url}\n"
         )
         html_body = self._email_shell(
@@ -421,7 +424,10 @@ class MeetingCoordinator:
                 f"<p style='margin:0 0 14px;'><strong>Preferred time:</strong> {request.preferred_time}</p>"
                 "<p style='margin:0 0 14px;font-size:13px;color:#64748b;'>"
                 "Use <strong>US Eastern (EST/ET)</strong> in every slot you propose (NJ).</p>"
-                f"<p style='margin:0 0 14px;'>Choose a slot and send proposal:</p>"
+                f"<p style='margin:0 0 12px;'>Choose an action:</p>"
+                f"<p style='margin:0 0 10px;'><a href='{accept_url}' "
+                "style='display:inline-block;background:#16a34a;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;'>"
+                "Accept Call (use preferred time)</a></p>"
                 f"<p style='margin:0;'><a href='{propose_url}' "
                 "style='display:inline-block;background:#1d4ed8;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;'>"
                 "Open Slot Proposal Form</a></p>"
@@ -618,6 +624,78 @@ class MeetingCoordinator:
                 return dict(entry)
         return None
 
+    def _confirm_entry_and_email(self, payload: Dict[str, Any], entry: Dict[str, Any], *, source: str) -> Dict[str, Any]:
+        entry["status"] = "confirmed"
+        entry["requester_response"] = "accept" if source == "requester" else "host_accept"
+        entry["approved_at"] = datetime.now(timezone.utc).isoformat()
+        if not (entry.get("proposed_time") or "").strip():
+            entry["proposed_time"] = ensure_est_in_slot_text((entry.get("preferred_time") or "").strip())
+        meet_link = entry.get("meeting_link") or self._build_meeting_link()
+        entry["meeting_link"] = meet_link
+        self._save(payload)
+
+        scheduled = entry.get("proposed_time") or entry.get("preferred_time")
+        subject = "Meeting confirmed with Jayanth ✅"
+        body = (
+            f"Hi {entry.get('name')},\n\n"
+            "Awesome — your meeting with Jayanth is confirmed.\n"
+            f"Scheduled time: {scheduled}\n"
+            f"Google Meet: {meet_link}\n\n"
+            "Looking forward to the conversation!\n\n"
+            "Best,\n"
+            "Ada, Jayanth's AI assistant"
+        )
+        html_body = self._email_shell(
+            title="Meeting confirmed ✅",
+            subtitle="Your call with Jayanth is set",
+            body_html=(
+                f"<p style='margin:0 0 12px;'>Hi {entry.get('name')},</p>"
+                "<p style='margin:0 0 10px;'>Awesome — your meeting with Jayanth is confirmed.</p>"
+                f"<p style='margin:0 0 10px;'><strong>Scheduled time:</strong> {scheduled}</p>"
+                f"<p style='margin:0 0 14px;'><strong>Google Meet:</strong> "
+                f"<a href='{meet_link}' style='color:#1d4ed8;text-decoration:underline;'>{meet_link}</a></p>"
+                "<p style='margin:0;'>Looking forward to the conversation!</p>"
+            ),
+        )
+        requester_email = (entry.get("email") or "").strip()
+        sent_requester = self._send_email(
+            subject=subject, body=body, to_email=requester_email, html_body=html_body
+        )
+        notify_email = os.getenv("JAYANTH_NOTIFY_EMAIL", "jayanthdasamantharao@gmail.com").strip()
+        req_lower = requester_email.lower()
+        host_sent = False
+        if notify_email:
+            if req_lower == notify_email.lower():
+                host_sent = bool(sent_requester)
+            else:
+                host_sent = self._send_email(
+                    subject=subject, body=body, to_email=notify_email, html_body=html_body
+                )
+        entry["confirmation_sent"] = sent_requester
+        entry["host_confirmation_sent"] = host_sent
+        self._save(payload)
+        return {
+            "status": "confirmed",
+            "request": entry,
+            "confirmation_sent": sent_requester,
+            "host_confirmation_sent": host_sent,
+        }
+
+    def host_accept_call(self, token: str) -> Dict[str, Any]:
+        found = self._find_request_by_token(token)
+        payload = found["payload"]
+        entry = found["entry"]
+        if not entry:
+            return {"status": "not_found"}
+        st = (entry.get("status") or "pending").strip()
+        if st == "confirmed":
+            return {"status": "already_confirmed", "request": dict(entry)}
+        if st == "cancelled":
+            return {"status": "invalid_state", "reason": "Meeting already cancelled"}
+        if st not in ("pending", "awaiting_host_proposal", "reschedule_requested", "proposed"):
+            return {"status": "invalid_state", "reason": f"Cannot accept from status={st!r}"}
+        return self._confirm_entry_and_email(payload, entry, source="host")
+
     def respond_to_proposal(self, response_token: str, decision: str) -> Dict[str, Any]:
         payload = self._load()
         for entry in payload.get("requests", []):
@@ -630,62 +708,7 @@ class MeetingCoordinator:
 
             if entry.get("status") != "proposed":
                 return {"status": "invalid_state", "reason": "No active proposal to confirm."}
-
-            # accepted
-            entry["status"] = "confirmed"
-            entry["requester_response"] = "accept"
-            entry["approved_at"] = datetime.now(timezone.utc).isoformat()
-            meet_link = entry.get("meeting_link") or self._build_meeting_link()
-            entry["meeting_link"] = meet_link
-            self._save(payload)
-
-            subject = "Meeting confirmed with Jayanth ✅"
-            body = (
-                f"Hi {entry.get('name')},\n\n"
-                "Awesome — your meeting with Jayanth is confirmed.\n"
-                f"Scheduled time: {entry.get('proposed_time') or entry.get('preferred_time')}\n"
-                f"Google Meet: {meet_link}\n\n"
-                "Looking forward to the conversation!\n\n"
-                "Best,\n"
-                "Ada, Jayanth's AI assistant"
-            )
-            html_body = self._email_shell(
-                title="Meeting confirmed ✅",
-                subtitle="Your call with Jayanth is set",
-                body_html=(
-                    f"<p style='margin:0 0 12px;'>Hi {entry.get('name')},</p>"
-                    "<p style='margin:0 0 10px;'>Awesome — your meeting with Jayanth is confirmed.</p>"
-                    f"<p style='margin:0 0 10px;'><strong>Scheduled time:</strong> {entry.get('proposed_time') or entry.get('preferred_time')}</p>"
-                    f"<p style='margin:0 0 14px;'><strong>Google Meet:</strong> "
-                    f"<a href='{meet_link}' style='color:#1d4ed8;text-decoration:underline;'>{meet_link}</a></p>"
-                    "<p style='margin:0;'>Looking forward to the conversation!</p>"
-                ),
-            )
-            requester_email = (entry.get("email") or "").strip()
-            sent_requester = self._send_email(
-                subject=subject, body=body, to_email=requester_email, html_body=html_body
-            )
-            notify_email = os.getenv("JAYANTH_NOTIFY_EMAIL", "jayanthdasamantharao@gmail.com").strip()
-            req_lower = requester_email.lower()
-            host_sent = False
-            if notify_email:
-                if req_lower == notify_email.lower():
-                    # Same inbox as requester — one email already contains the confirmation.
-                    host_sent = bool(sent_requester)
-                else:
-                    # Jayanth gets the same confirmation (Meet link + time) as the requester.
-                    host_sent = self._send_email(
-                        subject=subject, body=body, to_email=notify_email, html_body=html_body
-                    )
-            entry["confirmation_sent"] = sent_requester
-            entry["host_confirmation_sent"] = host_sent
-            self._save(payload)
-            return {
-                "status": "confirmed",
-                "request": entry,
-                "confirmation_sent": sent_requester,
-                "host_confirmation_sent": host_sent,
-            }
+            return self._confirm_entry_and_email(payload, entry, source="requester")
 
         return {"status": "not_found"}
 
