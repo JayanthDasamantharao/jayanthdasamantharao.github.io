@@ -377,6 +377,24 @@ def _looks_like_bot_implementation_question(message: str) -> bool:
     return False
 
 
+def _looks_like_meeting_status_query(message: str) -> bool:
+    """User asks to check existing meeting status/time (not cancel/reschedule)."""
+    low = (message or "").lower()
+    if not low.strip():
+        return False
+    if any(w in low for w in ("cancel", "reschedul", "move my", "change my", "another slot", "need another slot")):
+        return False
+    patterns = (
+        r"\bwhat\s+time\b.*\b(call|meeting|schedule)\b",
+        r"\bwhen\s+(is|was)\s+(my|the)\s+(call|meeting)\b",
+        r"\bdo\s+i\s+have\s+(a\s+)?(call|meeting)\b",
+        r"\b(check|see|show)\b.*\b(schedule|meeting|call)\b",
+        r"\bmeeting\s+status\b",
+        r"\bschedule\s+status\b",
+    )
+    return any(re.search(p, low) for p in patterns)
+
+
 def _extract_email_guess(text: str) -> Optional[str]:
     m = re.search(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", text or "", re.I)
     return m.group(0).strip().lower() if m else None
@@ -1067,6 +1085,98 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
                 intent=intent,
                 intent_confidence=intent_confidence,
             )
+
+        # Schedule-status lookup: if user asks "when is my call / what's my schedule",
+        # return on-file meeting details instead of forcing cancel/reschedule flow.
+        if _looks_like_meeting_status_query(payload.message):
+            details = engine.extract_connect_details(payload.message, payload.history)
+            email_hint = (details.get("email") or "").strip()
+            entry = meeting_coordinator.find_active_request_for_chat(session_id, email_hint or None)
+            if not entry and email_hint:
+                entry = meeting_coordinator.find_latest_by_email(email_hint)
+            if entry:
+                rid = str(entry.get("request_id") or "").strip()
+                if rid:
+                    linked = meeting_coordinator.attach_chat_session_to_entry(rid, session_id)
+                    if linked:
+                        entry = linked
+                status = str(entry.get("status") or "").strip().lower()
+                if status in {"pending", "awaiting_host_proposal", "proposed", "confirmed", "reschedule_requested"}:
+                    reply = _reply_linked_existing_meeting(
+                        entry,
+                        details,
+                        payload.message,
+                        payload.history,
+                        context="connect_direct",
+                        send_relink_emails=False,
+                    )
+                else:
+                    when = ensure_est_in_slot_text(
+                        (
+                            (entry.get("proposed_time") or "").strip()
+                            or (entry.get("preferred_time") or "").strip()
+                            or "the previous time on file"
+                        )
+                    )
+                    fb = (
+                        f"I found your meeting record for **{(entry.get('email') or email_hint or 'that email')}** — "
+                        f"it is currently **{status or 'closed'}**. "
+                        f"Last on-file time: **{when}**. "
+                        "If you want, I can help start a fresh request too. ✨"
+                    )
+                    reply = engine.compose_flow_reply(
+                        instruction=(
+                            "The user asked for meeting status. Provide status and last on-file time from facts. "
+                            "If status is cancelled/closed, say so clearly and offer to start a new request."
+                        ),
+                        message=payload.message,
+                        history=payload.history,
+                        facts={
+                            "lookup_email": (entry.get("email") or email_hint or ""),
+                            "meeting_status": status or "closed",
+                            "last_time_on_file": when,
+                        },
+                        fallback_reply=fb,
+                    )
+                if chat_store:
+                    chat_store.log_message(
+                        session_id=session_id,
+                        role="assistant",
+                        message_text=reply,
+                        intent="meeting_change",
+                        intent_confidence=intent_confidence,
+                        sources=[],
+                    )
+                return {"reply": reply, "sources": [], "session_id": session_id, "intent": "meeting_change"}
+            if email_hint:
+                fb = (
+                    "I couldn't find a meeting on file for that email yet. "
+                    "If you'd like, I can start a new request right now."
+                )
+            else:
+                fb = (
+                    "I can check that right away — share the email used for booking, and I'll pull your meeting status."
+                )
+            reply = engine.compose_flow_reply(
+                instruction=(
+                    "Meeting status was requested but no matching record was found. "
+                    "If email is missing, ask only for email. If provided and no match, say no meeting found and offer new request."
+                ),
+                message=payload.message,
+                history=payload.history,
+                facts={"email_hint": email_hint or None, "meeting_found": False},
+                fallback_reply=fb,
+            )
+            if chat_store:
+                chat_store.log_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_text=reply,
+                    intent="meeting_change",
+                    intent_confidence=intent_confidence,
+                    sources=[],
+                )
+            return {"reply": reply, "sources": [], "session_id": session_id, "intent": "meeting_change"}
 
         if intent == "abusive":
             reply = engine.intent_reply(intent, payload.message, payload.history)
