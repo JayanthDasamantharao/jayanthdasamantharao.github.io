@@ -78,6 +78,14 @@ def _load_env_file(path: Path) -> None:
 
 _load_env_file(REPO_ROOT / "backend" / ".env")
 engine = ResumeRagEngine(repo_root=REPO_ROOT, data_dir=REPO_ROOT / "backend" / "data")
+if not engine.is_ready:
+    # On hosts without a persistent disk (e.g. Render Starter), the on-disk index
+    # is wiped on every deploy/restart, so self-heal instead of requiring a manual
+    # POST /api/reindex after each one.
+    try:
+        engine.build_index()
+    except Exception as exc:  # pragma: no cover - runtime safety
+        print(f"WARNING: startup auto-reindex failed, index remains empty: {exc}")
 meeting_coordinator = MeetingCoordinator(data_dir=REPO_ROOT / "backend" / "data")
 connect_verification = ConnectEmailVerificationStore(REPO_ROOT / "backend" / "data")
 database_url = os.getenv("DATABASE_URL", "").strip()
