@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import logging
 import os
 import re
 import secrets
@@ -48,6 +49,8 @@ class AdminLoginRequest(BaseModel):
     password: str
 
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Jayanth AI Twin API")
 app.add_middleware(
     CORSMiddleware,
@@ -78,6 +81,18 @@ engine = ResumeRagEngine(repo_root=REPO_ROOT, data_dir=REPO_ROOT / "backend" / "
 meeting_coordinator = MeetingCoordinator(data_dir=REPO_ROOT / "backend" / "data")
 connect_verification = ConnectEmailVerificationStore(REPO_ROOT / "backend" / "data")
 database_url = os.getenv("DATABASE_URL", "").strip()
+
+
+def _init_chat_store(url: str) -> Optional[ChatStore]:
+    if not url:
+        return None
+    try:
+        return ChatStore(database_url=url)
+    except Exception as exc:  # pragma: no cover - runtime safety
+        # A DB outage/DNS blip at boot should degrade chat persistence, not take down
+        # the whole app (resume downloads, meeting scheduling, etc. don't need it).
+        print(f"WARNING: chat persistence disabled, ChatStore init failed: {exc}")
+        return None
 
 
 def _validate_requester_email(raw: Optional[str]) -> Tuple[bool, str, str]:
@@ -115,7 +130,7 @@ def _validate_requester_email(raw: Optional[str]) -> Tuple[bool, str, str]:
     return True, "", normalized
 
 
-chat_store = ChatStore(database_url=database_url) if database_url else None
+chat_store = _init_chat_store(database_url)
 chat_admin_enabled = os.getenv("CHAT_ADMIN_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
 chat_admin_username = os.getenv("CHAT_ADMIN_USERNAME", "").strip()
 chat_admin_password = os.getenv("CHAT_ADMIN_PASSWORD", "").strip()
@@ -1812,7 +1827,8 @@ def chat(payload: ChatRequest) -> Dict[str, Any]:
             )
         return {"reply": reply, "sources": sources, "session_id": session_id, "intent": stored_intent}
     except Exception as exc:  # pragma: no cover - runtime safety
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("Unhandled error in /api/chat")
+        raise HTTPException(status_code=500, detail="Chat is temporarily unavailable. Please try again shortly.") from exc
 
 
 @app.get("/api/meeting/approve/{token}")

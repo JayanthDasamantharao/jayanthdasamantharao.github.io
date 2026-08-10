@@ -378,7 +378,7 @@ if (chatbotToggle && chatbotPanel && chatbotClose && chatbotMinimize && chatbotM
     } catch (error) {
       const fallback = getFallbackReply(text, chatHistory.length <= 1);
       typingBubble.remove();
-      await addMessageTyped(`${fallback}\n\n(Note: ${error.message})`, "bot");
+      await addMessageTyped(fallback, "bot");
       chatHistory.push({ role: "assistant", content: fallback });
     } finally {
       if (!chatLockedForAbuse) {

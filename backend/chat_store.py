@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -21,13 +22,30 @@ def _utc_iso_z(dt: datetime) -> str:
 
 
 class ChatStore:
-    def __init__(self, database_url: str) -> None:
+    def __init__(self, database_url: str, *, init_retries: int = 5, init_retry_delay_seconds: float = 2.0) -> None:
         self.engine = create_db_engine(database_url)
         self.SessionLocal = create_session_factory(self.engine)
-        Base.metadata.create_all(bind=self.engine)
-        # Backward-compatible schema update for existing local DBs.
-        with self.engine.begin() as conn:
-            conn.execute(text("ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS intent_confidence DOUBLE PRECISION"))
+        self._init_schema(retries=init_retries, delay_seconds=init_retry_delay_seconds)
+
+    def _init_schema(self, *, retries: int, delay_seconds: float) -> None:
+        # DB connectivity at boot (e.g. Render internal DNS not yet ready right after a
+        # deploy) can be transiently unavailable, so retry with backoff before giving up.
+        last_exc: Optional[Exception] = None
+        for attempt in range(1, retries + 1):
+            try:
+                Base.metadata.create_all(bind=self.engine)
+                # Backward-compatible schema update for existing local DBs.
+                with self.engine.begin() as conn:
+                    conn.execute(
+                        text("ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS intent_confidence DOUBLE PRECISION")
+                    )
+                return
+            except Exception as exc:  # noqa: BLE001 - retry on any connectivity/DDL error
+                last_exc = exc
+                if attempt < retries:
+                    time.sleep(delay_seconds * attempt)
+        assert last_exc is not None
+        raise last_exc
 
     @contextmanager
     def _session_scope(self):
